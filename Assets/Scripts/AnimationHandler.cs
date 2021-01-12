@@ -30,4 +30,9 @@ public class AnimationHandler : MonoBehaviour
 
         anim.SetFloat("Speed", rigidbody2D.velocity.magnitude / movingEntity.maxSpeed);
     }
+
+    public void AttackAnimation()
+    {
+        anim.SetTrigger("Attack");
+    }
 }

@@ -7,7 +7,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit 
+        Seek, Flee, Arrive, Pursuit, Evade, Wander
     }
     public State state = State.Seek;
 
@@ -20,6 +20,7 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] float panicDistance = 7f;
 
     public MovingEntity movingEntity;
+    public Vector2 wanderTarget;
     private void Start()
     {
         movingEntity = GetComponent<MovingEntity>();
@@ -41,6 +42,10 @@ public class SteeringBehaviors : MonoBehaviour
                 return Arrive(GetComponent<Enemy>().targetTr.position, deceleration);
             case State.Pursuit:
                 return Pursuit(GetComponent<Enemy>().targetTr.GetComponent<Rigidbody2D>());
+            case State.Evade:
+                return Evade(GetComponent<Enemy>().targetTr.GetComponent<Rigidbody2D>());
+            case State.Wander:
+                return Wander();
             default:
                 return Vector2.zero;
 
@@ -48,6 +53,7 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
+    //debug
     [Header("Vector2.Dot(ToEvader, selfHeading):")]
     [SerializeField] float Vector2Dot;
     [Header("Vector2.Dot(evaderHeading, selfHeading):")]
@@ -119,4 +125,39 @@ public class SteeringBehaviors : MonoBehaviour
 
         return Seek((Vector2)evader.transform.position + evader.velocity * lookAheadTime);
     }
+
+    private Vector2 Evade(Rigidbody2D pursuer)
+    {
+        Vector2 ToPursuer = pursuer.transform.position - transform.position;
+
+        float lookAheadTime = ToPursuer.magnitude /
+            (movingEntity.maxSpeed + pursuer.GetComponent<MovingEntity>().maxSpeed);
+
+        return Flee((Vector2)pursuer.transform.position + pursuer.velocity * lookAheadTime);
+    }
+
+    [SerializeField] float wanderRadius;
+    [SerializeField] float wanderDistance;
+    [SerializeField] float wanderJitter;
+    
+    private Vector2 Wander()
+    {
+        Vector2 targetLocal;
+        Vector2 targetWorld;
+
+        wanderTarget += new Vector2(UnityEngine.Random.Range(-1f, 1f) * wanderJitter,
+            UnityEngine.Random.Range(-1f, 1f) * wanderJitter);
+
+        wanderTarget = wanderTarget.normalized;
+
+        wanderTarget *= wanderRadius;
+
+        targetLocal = wanderTarget + new Vector2(wanderDistance, 0f);
+
+        targetWorld = (Vector2)transform.position + targetLocal;
+
+        return targetWorld - (Vector2)transform.position;
+
+    }
+
 }

@@ -331,10 +331,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8caad896b4336014bae12df900122c44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 3
+  state: 5
   deceleration: 3
   panicDistance: 7
   movingEntity: {fileID: 0}
+  wanderTarget: {x: 0, y: 0}
+  Vector2Dot: 0
+  relativeHeading: 0
+  MathfAcos: 0
+  wanderRadius: 5
+  wanderDistance: 2
+  wanderJitter: 2
 --- !u!95 &461042079
 Animator:
   serializedVersion: 3
