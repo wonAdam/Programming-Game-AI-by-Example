@@ -8,7 +8,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance
     }
     public State state = State.Seek;
 
@@ -48,7 +48,7 @@ public class SteeringBehaviors : MonoBehaviour
             case State.Wander:
                 return Wander();
             case State.ObstacleAvoidance:
-                return ObstacleAvoidance();
+                return ObstacleAvoidance(GetComponent<Enemy>().targetTr.position);
             default:
                 return Vector2.zero;
 
@@ -65,8 +65,9 @@ public class SteeringBehaviors : MonoBehaviour
     //[SerializeField] float MathfAcos;
     private Vector2 Seek(Vector2 TargetPos)
     {
-        Vector2 desiredVelocity = (TargetPos - (Vector2)transform.position).normalized * movingEntity.maxSpeed;
-        return desiredVelocity - GetComponent<Rigidbody2D>().velocity + ObstacleAvoidance();
+        Vector2 desiredVelocity = 
+            (TargetPos - (Vector2)transform.position).normalized * movingEntity.maxSpeed;
+        return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
     private Vector2 Flee(Vector2 TargetPos)
@@ -163,54 +164,73 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
+    [SerializeField] Collider2D lastTimeObstacle;
     [SerializeField] float minDetectionBoxLength;
-    private Vector2 ObstacleAvoidance()
+    private Vector2 ObstacleAvoidance(Vector2 TargetPos)
     {
         // Cast DetectionBox
-        Vector2 direction = GetComponent<Rigidbody2D>().velocity;
+        // Mark All Obstacles within the DetectionBox
+        Vector2 direction = TargetPos - (Vector2)transform.position;
         List<RaycastHit2D> results = new List<RaycastHit2D>();
         float boxLength = CalcBoxLength();
         GetComponent<Collider2D>().Cast(direction, GetContactFilter2D(), results, boxLength);
 
-        // Mark All Obstacles within the DetectionBox
-        // done by results List
+        Matrix4x4 worldToLocal = Matrix4x4.TRS(
+            transform.position,
+            Quaternion.FromToRotation(Vector3.right, direction),
+            Vector3.one
+            );
 
-        if(results.Count == 0)
-            return Vector2.zero;
+        // velocity == 0 || no obstacle front
+        if (results.Count == 0)
+        {
+            return Seek(TargetPos);
+        }
 
         // Find a Nearest Obstacle
         Collider2D nearestIntersectingObstacle = GetNearestIntersectingObstacle(results);
+        lastTimeObstacle = nearestIntersectingObstacle;
 
-        // Calculate SteeringForce
-        Vector2 steeringForce = CalcSteeringForce(boxLength, nearestIntersectingObstacle);
+        // Calculate SteeringLocalForce
+        Vector2 steeringForceLocal = CalcSteeringLocalForce(boxLength, nearestIntersectingObstacle, worldToLocal);
 
-        return steeringForce;
+        //debug
+        this.steeringForceLocal = steeringForceLocal;
+
+        // Project LocalForce To World
+        Vector2 steeringForceWorld =
+            worldToLocal.inverse.MultiplyPoint3x4(steeringForceLocal);
+        this.steeringForceWorld = steeringForceWorld;
+
+        if(direction.x < 0) steeringForceWorld.y *= -1f;
+        return Seek(TargetPos) + steeringForceWorld;
     }
 
     //debug
+    [SerializeField] Vector2 steeringForceLocal;
+    [SerializeField] Vector2 steeringForceWorld = new Vector2(0f,0f);
     [SerializeField] Vector2 localPosOfObstacle;
     [SerializeField] float obstacleXRadius;
     [SerializeField] float obstacleYRadius;
     [SerializeField] Vector2 boundsSize;
-    private Vector2 CalcSteeringForce(float boxLength, Collider2D nearestIntersectingObstacle)
+    
+    private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 worldToLocal)
     {
-        float steeringForceX, steeringForceY; 
-        Vector2 currDirection = GetComponent<Rigidbody2D>().velocity.normalized;
-        Vector2 localPosOfObstacle = nearestIntersectingObstacle.transform.position - transform.position;
-
+        // project nearestIntersectingObstacle to local coordinate
+        float steeringLocalForceX, steeringLocalForceY;
+        
+        Vector2 localPosOfObstacle = 
+            worldToLocal.MultiplyPoint3x4(nearestIntersectingObstacle.transform.position);
 
         // y
-        float multiplier = 1.0f + (boxLength - Vector2.Dot(localPosOfObstacle, currDirection)) / boxLength;
+        float multiplier = 1.0f + (boxLength - localPosOfObstacle.x) / boxLength;
         float obstacleYRadius = nearestIntersectingObstacle.bounds.size.y;
-        steeringForceY =
-            localPosOfObstacle.y > 0 ?
-            (localPosOfObstacle.y - obstacleYRadius) * multiplier : (obstacleYRadius - localPosOfObstacle.y) * multiplier
-            ;
+        steeringLocalForceY = (obstacleYRadius - localPosOfObstacle.y) * multiplier;
 
         // x
-        const float brakingWeight = 0.5f;
+        const float brakingWeight = 0.2f;
         float obstacleXRadius = nearestIntersectingObstacle.bounds.size.x;
-        steeringForceX = (localPosOfObstacle.x - obstacleXRadius) * brakingWeight;
+        steeringLocalForceX = (obstacleXRadius - localPosOfObstacle.x) * brakingWeight;
 
         //debug
         this.boundsSize = nearestIntersectingObstacle.bounds.size;
@@ -218,8 +238,11 @@ public class SteeringBehaviors : MonoBehaviour
         this.obstacleXRadius = obstacleXRadius;
         this.obstacleYRadius = obstacleYRadius;
 
-        return new Vector2(steeringForceX, steeringForceY);
+        return new Vector2(steeringLocalForceX, steeringLocalForceY);
     }
+
+    private float GetAbsDiff(float v1, float v2) => Mathf.Abs(Mathf.Abs(v1) - Mathf.Abs(v2));
+
     private Collider2D GetNearestIntersectingObstacle(List<RaycastHit2D> results)
     {
         Collider2D nearestIntersectingObstacle = null;
@@ -247,13 +270,9 @@ public class SteeringBehaviors : MonoBehaviour
     }
     private float CalcBoxLength() => minDetectionBoxLength + (GetComponent<Rigidbody2D>().velocity.magnitude / movingEntity.maxSpeed) * minDetectionBoxLength;
 
-    //private void OnDrawGizmos()
-    //{
-    //    if(state == State.ObstacleAvoidance)
-    //    {
-
-
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        Debug.DrawLine(transform.position, transform.position + (Vector3)steeringForceWorld, Color.yellow);
+    }
 
 }
