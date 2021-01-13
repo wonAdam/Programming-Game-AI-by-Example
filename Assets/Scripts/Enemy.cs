@@ -20,6 +20,11 @@ public class Enemy : MovingEntity
     private void FixedUpdate()
     {
         // SteeringBehaviors state에 따라 velocity를 갱신합니다.
+        ProcessSteeringBehaviors();
+    }
+
+    private void ProcessSteeringBehaviors()
+    {
         Vector2 steeringForce = m_pSteering.Calculate();
         Vector2 acceleration = steeringForce / GetComponent<Rigidbody2D>().mass;
         rigidbody2D.velocity += acceleration;

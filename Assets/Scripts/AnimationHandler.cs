@@ -18,11 +18,16 @@ public class AnimationHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ProcessMoveAnimation();
+    }
+
+    private void ProcessMoveAnimation()
+    {
         if (rigidbody2D.velocity.x < 0)
         {
             transform.localScale = new Vector3(-7f, 7f, 7f);
         }
-        else if(rigidbody2D.velocity.x > 0)
+        else if (rigidbody2D.velocity.x > 0)
         {
             transform.localScale = new Vector3(7f, 7f, 7f);
         }

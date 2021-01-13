@@ -17,6 +17,7 @@ public class PlayerMover : MovingEntity
         v = Input.GetAxis("Vertical");
         h = Input.GetAxis("Horizontal");
 
+        // TODO - should seperate from mover
         if(Input.GetKeyDown(KeyCode.Space))
         {
             animHandler.AttackAnimation();
