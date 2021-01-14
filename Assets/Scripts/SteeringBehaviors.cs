@@ -10,18 +10,24 @@ public class SteeringBehaviors : MonoBehaviour
     {
         Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance
     }
-    public State state = State.Seek;
 
     public enum Deceleration
     {
         fast = 1, normal = 2, slow = 3
     }
-    public Deceleration deceleration = Deceleration.slow;
 
+    private MovingEntity movingEntity;
+    private Vector2 wanderTarget;
+    private Collider2D lastTimeObstacle;
+    public State state = State.Seek;
+
+    [SerializeField] Deceleration deceleration = Deceleration.slow;
     [SerializeField] float panicDistance = 7f;
+    [SerializeField] float wanderRadius;
+    [SerializeField] float wanderDistance;
+    [SerializeField] float wanderJitter;
+    [SerializeField] float minDetectionBoxLength;
 
-    public MovingEntity movingEntity;
-    public Vector2 wanderTarget;
     private void Start()
     {
         movingEntity = GetComponent<MovingEntity>();
@@ -56,13 +62,6 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
-    ////debug
-    //[Header("Vector2.Dot(ToEvader, selfHeading):")]
-    //[SerializeField] float Vector2Dot;
-    //[Header("Vector2.Dot(evaderHeading, selfHeading):")]
-    //[SerializeField] float relativeHeading;
-    //[Header("Mathf.Acos(relativeHeading) / Mathf.Deg2Rad:")]
-    //[SerializeField] float MathfAcos;
     private Vector2 Seek(Vector2 TargetPos)
     {
         Vector2 desiredVelocity = 
@@ -139,10 +138,6 @@ public class SteeringBehaviors : MonoBehaviour
 
         return Flee((Vector2)pursuer.transform.position + pursuer.velocity * lookAheadTime);
     }
-
-    [SerializeField] float wanderRadius;
-    [SerializeField] float wanderDistance;
-    [SerializeField] float wanderJitter;
     
     private Vector2 Wander()
     {
@@ -163,9 +158,7 @@ public class SteeringBehaviors : MonoBehaviour
         return targetWorld - (Vector2)transform.position;
 
     }
-
-    [SerializeField] Collider2D lastTimeObstacle;
-    [SerializeField] float minDetectionBoxLength;
+    
     private Vector2 ObstacleAvoidance(Vector2 TargetPos)
     {
         // Cast DetectionBox
@@ -205,30 +198,18 @@ public class SteeringBehaviors : MonoBehaviour
         // Calculate SteeringLocalForce
         Vector2 steeringForceLocal = CalcSteeringLocalForce(boxLength, nearestIntersectingObstacle, localToWorld);
 
-        //debug
-        this.steeringForceLocal = steeringForceLocal;
-
         // Project LocalForce To World
         Vector2 steeringForceWorld = localToWorld.MultiplyPoint3x4(steeringForceLocal);
             //worldToLocal.inverse.MultiplyPoint3x4(steeringForceLocal);
-        this.steeringForceWorld = steeringForceWorld;
 
         //if(direction.x < 0) steeringForceWorld.y *= -1f;
         Vector2 desiredVelocity = (Seek(TargetPos) + steeringForceWorld).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
-    //debug
-    [SerializeField] Vector2 steeringForceLocal;
-    [SerializeField] Vector2 steeringForceWorld = new Vector2(0f,0f);
-    [SerializeField] Vector2 localPosOfObstacle;
-    [SerializeField] float obstacleXRadius;
-    [SerializeField] float obstacleYRadius;
-    [SerializeField] Vector2 boundsSize;
-    
+    #region Helper Functions
     private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 localToWorld)
     {
-        // project nearestIntersectingObstacle to local coordinate
         float steeringLocalForceX, steeringLocalForceY;
 
         Vector2 localPosOfObstacle =
@@ -244,15 +225,9 @@ public class SteeringBehaviors : MonoBehaviour
         float obstacleXRadius = nearestIntersectingObstacle.bounds.size.x;
         steeringLocalForceX = (obstacleXRadius - localPosOfObstacle.x) * brakingWeight;
 
-        //debug
-        this.boundsSize = nearestIntersectingObstacle.bounds.size;
-        this.localPosOfObstacle = localPosOfObstacle;
-        this.obstacleXRadius = obstacleXRadius;
-        this.obstacleYRadius = obstacleYRadius;
 
         return new Vector2(steeringLocalForceX, steeringLocalForceY);
     }
-
     private static float SignReverse(float v) => (-1f) * Mathf.Sign(v);
     private float GetAbsDiff(float v1, float v2) => Mathf.Abs(Mathf.Abs(v1) - Mathf.Abs(v2));
     private Collider2D GetNearestIntersectingObstacle(List<RaycastHit2D> results)
@@ -281,11 +256,6 @@ public class SteeringBehaviors : MonoBehaviour
         return contactFilter2D;
     }
     private float CalcBoxLength() => minDetectionBoxLength + (GetComponent<Rigidbody2D>().velocity.magnitude / movingEntity.maxSpeed) * minDetectionBoxLength;
-
-    private void OnDrawGizmos()
-    {
-        Debug.DrawLine(Vector2.zero, (Vector3)steeringForceWorld, Color.yellow);
-        Debug.DrawLine(transform.position, transform.position + (Vector3)steeringForceLocal, Color.blue);
-    }
+    #endregion
 
 }
