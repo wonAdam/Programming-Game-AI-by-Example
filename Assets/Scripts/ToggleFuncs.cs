@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnemyModeToggle : MonoBehaviour
+public class ToggleFuncs : MonoBehaviour
 {
-    [SerializeField] Enemy enemy;
+    [SerializeField] Transform player;
+    [SerializeField] Transform enemy;
+    [SerializeField] FollowCamera followCam;
 
     public void OnClick_Seek(Toggle toggle)
     {
@@ -31,5 +33,24 @@ public class EnemyModeToggle : MonoBehaviour
     {
         if(toggle.isOn)
             enemy.GetComponent<SteeringBehaviors>().state = SteeringBehaviors.State.Evade;
+    }
+
+    public void OnClick_CamToEnemy(Toggle toggle) 
+    {
+        if (toggle.isOn)
+            followCam.target = enemy;
+    }
+
+    public void OnClick_CamToPlayer(Toggle toggle)
+    {
+        if(toggle.isOn)
+            followCam.target = player;
+
+    }
+    public void OnClick_CamMoveWithWASD(Toggle toggle)
+    {
+        if (toggle.isOn)
+            followCam.target = null;
+
     }
 }

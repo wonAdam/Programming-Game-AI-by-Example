@@ -110,21 +110,14 @@ public class SteeringBehaviors : MonoBehaviour
         Vector2 selfHeading = this.GetComponent<Rigidbody2D>().velocity.normalized;
         float relativeHeading = Vector2.Dot(evaderHeading, selfHeading);
 
-
-        ////// debug
-        //this.Vector2Dot = Vector2.Dot(ToEvader, selfHeading);
-        //this.relativeHeading = relativeHeading;
-        //this.MathfAcos = Mathf.Acos(relativeHeading);
         if (Vector2.Dot(ToEvader, selfHeading) > 0 && // 대면하고
             relativeHeading < Mathf.Cos(160f)) // 서로의 방향이 160도를 넘을 시
         {
             // 그냥 evader의 위치로 Seek
-            Debug.Log("evader");
             return Seek(evader.transform.position);
         }
 
         float lookAheadTime = ToEvader.magnitude / (GetComponent<MovingEntity>().maxSpeed + evader.velocity.magnitude);
-        Debug.Log("lookAheadTime");
 
         return Seek((Vector2)evader.transform.position + evader.velocity * lookAheadTime);
     }
@@ -206,6 +199,12 @@ public class SteeringBehaviors : MonoBehaviour
         Vector2 desiredVelocity = (Seek(TargetPos) + steeringForceWorld).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
+
+    //private Vector2 WallAvoidance(Vector2 TargetPos)
+    //{ 
+        
+    //}
+
 
     #region Helper Functions
     private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 localToWorld)
