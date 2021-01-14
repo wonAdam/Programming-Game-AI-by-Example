@@ -181,15 +181,26 @@ public class SteeringBehaviors : MonoBehaviour
             Vector3.one
             );
 
-        // velocity == 0 || no obstacle front
+        // no obstacle front
         if (results.Count == 0)
         {
             return Seek(TargetPos);
         }
+        // getting stucked
+        if(lastTimeObstacle != null && GetComponent<Collider2D>().IsTouching(lastTimeObstacle))
+        {
+            Vector2 perp1 = Vector2.Perpendicular(direction);
+            Vector2 perp2 = -1f * perp1;
+
+            Vector2 ToObstacle = lastTimeObstacle.transform.position - transform.position;
+            return Vector2.Dot(perp1, ToObstacle) < 0f ?
+                perp1.normalized * movingEntity.maxSpeed :
+                perp2.normalized * movingEntity.maxSpeed;
+        }
 
         // Find a Nearest Obstacle
         Collider2D nearestIntersectingObstacle = GetNearestIntersectingObstacle(results);
-        lastTimeObstacle = nearestIntersectingObstacle;
+        lastTimeObstacle = nearestIntersectingObstacle; // cache it for getting stucked situation
 
         // Calculate SteeringLocalForce
         Vector2 steeringForceLocal = CalcSteeringLocalForce(boxLength, nearestIntersectingObstacle, localToWorld);
@@ -242,13 +253,8 @@ public class SteeringBehaviors : MonoBehaviour
         return new Vector2(steeringLocalForceX, steeringLocalForceY);
     }
 
-    private static float SignReverse(float v)
-    {
-        return (-1f) * Mathf.Sign(v);
-    }
-
+    private static float SignReverse(float v) => (-1f) * Mathf.Sign(v);
     private float GetAbsDiff(float v1, float v2) => Mathf.Abs(Mathf.Abs(v1) - Mathf.Abs(v2));
-
     private Collider2D GetNearestIntersectingObstacle(List<RaycastHit2D> results)
     {
         Collider2D nearestIntersectingObstacle = null;
