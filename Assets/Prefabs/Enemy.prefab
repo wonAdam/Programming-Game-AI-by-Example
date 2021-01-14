@@ -104,7 +104,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 32bc368587b867944b9f3821e9b1ff42, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
@@ -185,13 +185,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 5
   deceleration: 3
-  panicDistance: 7
-  movingEntity: {fileID: 0}
-  wanderTarget: {x: 0, y: 0}
+  panicDistance: 4
   wanderRadius: 5
   wanderDistance: 2
   wanderJitter: 2
-  minDetectionBoxLength: 4
+  minDetectionBoxLength: 2
+  wallDetectionLength: 4
+  detectedWall: {fileID: 0}
 --- !u!114 &1727321378370613033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,3 +204,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4bc3aded87b9342983e099ba5b4d5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  angleSensitivity: 10
+  direction: 0

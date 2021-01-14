@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance
     }
 
     public enum Deceleration
@@ -26,7 +27,8 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] float wanderRadius;
     [SerializeField] float wanderDistance;
     [SerializeField] float wanderJitter;
-    [SerializeField] float minDetectionBoxLength;
+    [SerializeField] float minDetectionBoxLength; // obstacle
+    [SerializeField] float wallDetectionLength; // wall
 
     private void Start()
     {
@@ -42,19 +44,21 @@ public class SteeringBehaviors : MonoBehaviour
         switch (state)
         {
             case State.Seek:
-                return Seek(GetComponent<Enemy>().targetTr.position);
+                return Seek(GetComponent<EnemyMover>().targetTr.position);
             case State.Flee:
-                return Flee(GetComponent<Enemy>().targetTr.position);
+                return Flee(GetComponent<EnemyMover>().targetTr.position);
             case State.Arrive:
-                return Arrive(GetComponent<Enemy>().targetTr.position, deceleration);
+                return Arrive(GetComponent<EnemyMover>().targetTr.position, deceleration);
             case State.Pursuit:
-                return Pursuit(GetComponent<Enemy>().targetTr.GetComponent<Rigidbody2D>());
+                return Pursuit(GetComponent<EnemyMover>().targetTr.GetComponent<Rigidbody2D>());
             case State.Evade:
-                return Evade(GetComponent<Enemy>().targetTr.GetComponent<Rigidbody2D>());
+                return Evade(GetComponent<EnemyMover>().targetTr.GetComponent<Rigidbody2D>());
             case State.Wander:
                 return Wander();
             case State.ObstacleAvoidance:
-                return ObstacleAvoidance(GetComponent<Enemy>().targetTr.position);
+                return SeekWithObstacleAvoidance(GetComponent<EnemyMover>().targetTr.position);
+            case State.WallAvoidance:
+                return SeekWithWallAvoidance(GetComponent<EnemyMover>().targetTr.position);
             default:
                 return Vector2.zero;
 
@@ -152,6 +156,12 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
     
+    private Vector2 SeekWithObstacleAvoidance(Vector2 TargetPos)
+    {
+        Vector2 desiredVelocity = (Seek(TargetPos) + ObstacleAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
+        return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
+    }
+
     private Vector2 ObstacleAvoidance(Vector2 TargetPos)
     {
         // Cast DetectionBox
@@ -159,7 +169,7 @@ public class SteeringBehaviors : MonoBehaviour
         Vector2 direction = TargetPos - (Vector2)transform.position;
         List<RaycastHit2D> results = new List<RaycastHit2D>();
         float boxLength = CalcBoxLength();
-        GetComponent<Collider2D>().Cast(direction, GetContactFilter2D(), results, boxLength);
+        GetComponent<Collider2D>().Cast(direction, GetContactFilter2D("Obstacle"), results, boxLength);
 
         Matrix4x4 localToWorld = Matrix4x4.TRS(
             Vector3.zero,
@@ -193,17 +203,61 @@ public class SteeringBehaviors : MonoBehaviour
 
         // Project LocalForce To World
         Vector2 steeringForceWorld = localToWorld.MultiplyPoint3x4(steeringForceLocal);
-            //worldToLocal.inverse.MultiplyPoint3x4(steeringForceLocal);
 
-        //if(direction.x < 0) steeringForceWorld.y *= -1f;
-        Vector2 desiredVelocity = (Seek(TargetPos) + steeringForceWorld).normalized * movingEntity.maxSpeed;
+        return steeringForceWorld;
+    }
+
+    private Vector2 SeekWithWallAvoidance(Vector2 TargetPos)
+    {
+        Vector2 desiredVelocity = (Seek(TargetPos) + WallAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
-    //private Vector2 WallAvoidance(Vector2 TargetPos)
-    //{ 
-        
-    //}
+
+    [SerializeField] Collider2D detectedWall;
+    private Vector2 WallAvoidance(Vector2 TargetPos)
+    {
+        Vector2 direction = TargetPos - (Vector2)transform.position;
+        direction.Normalize();
+
+        //// three way Raycast ////
+        List<RaycastHit2D> results = new List<RaycastHit2D>();
+
+        // to direction
+        List<RaycastHit2D> hits2D = new List<RaycastHit2D>();
+        if (Physics2D.Raycast(transform.position, direction, GetContactFilter2D("Wall"), hits2D, wallDetectionLength) > 0)
+            foreach (var hit in hits2D)
+                results.Add(hit);
+
+        // to +30 degree from direction
+        Vector2 plus30degree = Quaternion.AngleAxis(30f, Vector3.forward) * direction;
+        hits2D.Clear();
+        if (Physics2D.Raycast(transform.position, plus30degree, GetContactFilter2D("Wall"), hits2D, wallDetectionLength) > 0)
+            foreach (var hit in hits2D)
+                results.Add(hit);
+
+        // to -30 degree from direction
+        Vector2 minus30degree = Quaternion.AngleAxis(-30f, Vector3.forward) * direction;
+        hits2D.Clear();
+        if (Physics2D.Raycast(transform.position, minus30degree, GetContactFilter2D("Wall"), hits2D, wallDetectionLength) > 0)
+            foreach (var hit in hits2D)
+                results.Add(hit);
+
+        // no wall
+        if (results.Count == 0)
+            return Vector2.zero;
+
+        //// get closest wall ////
+        RaycastHit2D closestWallHit = results.OrderBy((r) => Vector2.Distance(transform.position, r.transform.position)).ToList()[0];
+        detectedWall = closestWallHit.collider;
+
+        //// generate normal vector ////
+        Vector2 normal = closestWallHit.normal;
+        float mag = wallDetectionLength - closestWallHit.distance;
+
+        Vector2 steeringForce = normal * mag;
+        return steeringForce;
+    }
 
 
     #region Helper Functions
@@ -247,14 +301,29 @@ public class SteeringBehaviors : MonoBehaviour
 
         return nearestIntersectingObstacle;
     }
-    private ContactFilter2D GetContactFilter2D()
+    private ContactFilter2D GetContactFilter2D(params string[] layernames)
     {
         ContactFilter2D contactFilter2D = new ContactFilter2D();
         contactFilter2D.useLayerMask = true;
-        contactFilter2D.layerMask.value |= LayerMask.GetMask("Obstacle");
+        foreach(var name in layernames)
+            contactFilter2D.layerMask.value |= LayerMask.GetMask(name);
+        
         return contactFilter2D;
     }
     private float CalcBoxLength() => minDetectionBoxLength + (GetComponent<Rigidbody2D>().velocity.magnitude / movingEntity.maxSpeed) * minDetectionBoxLength;
     #endregion
 
+
+    private void OnDrawGizmos()
+    {
+        Vector2 direction = GetComponent<EnemyMover>().targetTr.position - transform.position;
+        direction.Normalize();
+        Vector2 plus30degree = Quaternion.AngleAxis(30f, Vector3.forward) * direction;
+        Vector2 minus30degree = Quaternion.AngleAxis(-30f, Vector3.forward) * direction;
+
+
+        Debug.DrawLine(transform.position, (Vector2)transform.position + direction.normalized * wallDetectionLength, Color.red);
+        Debug.DrawLine(transform.position, (Vector2)transform.position + plus30degree * wallDetectionLength, Color.red);
+        Debug.DrawLine(transform.position, (Vector2)transform.position + minus30degree * wallDetectionLength, Color.red);
+    }
 }

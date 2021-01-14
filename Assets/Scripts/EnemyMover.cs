@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MovingEntity
+public class EnemyMover : MovingEntity
 {
     public SteeringBehaviors m_pSteering;
     [SerializeField] public Transform targetTr;

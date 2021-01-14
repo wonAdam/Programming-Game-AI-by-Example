@@ -5,6 +5,7 @@ using UnityEngine;
 public class AnimationHandler : MonoBehaviour
 {
     public enum Direction { Left, Right }
+    [SerializeField] float angleSensitivity;
     public Direction direction = Direction.Left;
     MovingEntity movingEntity;
     Rigidbody2D rigidbody2D;
@@ -46,14 +47,14 @@ public class AnimationHandler : MonoBehaviour
 
         if (direction == Direction.Left)
         {
-            if (Vector2.Dot(Vector2.left, directionVec.normalized) < Mathf.Cos(80f))
+            if (Vector2.Dot(Vector2.left, directionVec.normalized) < Mathf.Cos(angleSensitivity))
             {
                 direction = Direction.Right;
             }
         }
         else
         {
-            if (Vector2.Dot(Vector2.right, directionVec.normalized) < Mathf.Cos(80f))
+            if (Vector2.Dot(Vector2.right, directionVec.normalized) < Mathf.Cos(angleSensitivity))
             {
                 direction = Direction.Left;
             }
