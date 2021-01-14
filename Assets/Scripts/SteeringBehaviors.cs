@@ -175,8 +175,8 @@ public class SteeringBehaviors : MonoBehaviour
         float boxLength = CalcBoxLength();
         GetComponent<Collider2D>().Cast(direction, GetContactFilter2D(), results, boxLength);
 
-        Matrix4x4 worldToLocal = Matrix4x4.TRS(
-            transform.position,
+        Matrix4x4 localToWorld = Matrix4x4.TRS(
+            Vector3.zero,
             Quaternion.FromToRotation(Vector3.right, direction),
             Vector3.one
             );
@@ -192,18 +192,19 @@ public class SteeringBehaviors : MonoBehaviour
         lastTimeObstacle = nearestIntersectingObstacle;
 
         // Calculate SteeringLocalForce
-        Vector2 steeringForceLocal = CalcSteeringLocalForce(boxLength, nearestIntersectingObstacle, worldToLocal);
+        Vector2 steeringForceLocal = CalcSteeringLocalForce(boxLength, nearestIntersectingObstacle, localToWorld);
 
         //debug
         this.steeringForceLocal = steeringForceLocal;
 
         // Project LocalForce To World
-        Vector2 steeringForceWorld =
-            worldToLocal.inverse.MultiplyPoint3x4(steeringForceLocal);
+        Vector2 steeringForceWorld = localToWorld.MultiplyPoint3x4(steeringForceLocal);
+            //worldToLocal.inverse.MultiplyPoint3x4(steeringForceLocal);
         this.steeringForceWorld = steeringForceWorld;
 
-        if(direction.x < 0) steeringForceWorld.y *= -1f;
-        return Seek(TargetPos) + steeringForceWorld;
+        //if(direction.x < 0) steeringForceWorld.y *= -1f;
+        Vector2 desiredVelocity = (Seek(TargetPos) + steeringForceWorld).normalized * movingEntity.maxSpeed;
+        return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
     //debug
@@ -214,18 +215,18 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] float obstacleYRadius;
     [SerializeField] Vector2 boundsSize;
     
-    private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 worldToLocal)
+    private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 localToWorld)
     {
         // project nearestIntersectingObstacle to local coordinate
         float steeringLocalForceX, steeringLocalForceY;
-        
-        Vector2 localPosOfObstacle = 
-            worldToLocal.MultiplyPoint3x4(nearestIntersectingObstacle.transform.position);
+
+        Vector2 localPosOfObstacle =
+            localToWorld.inverse.MultiplyPoint3x4(nearestIntersectingObstacle.transform.position - transform.position);
 
         // y
         float multiplier = 1.0f + (boxLength - localPosOfObstacle.x) / boxLength;
         float obstacleYRadius = nearestIntersectingObstacle.bounds.size.y;
-        steeringLocalForceY = (obstacleYRadius - localPosOfObstacle.y) * multiplier;
+        steeringLocalForceY = SignReverse(localPosOfObstacle.y) * GetAbsDiff(obstacleYRadius, localPosOfObstacle.y) * multiplier;
 
         // x
         const float brakingWeight = 0.2f;
@@ -239,6 +240,11 @@ public class SteeringBehaviors : MonoBehaviour
         this.obstacleYRadius = obstacleYRadius;
 
         return new Vector2(steeringLocalForceX, steeringLocalForceY);
+    }
+
+    private static float SignReverse(float v)
+    {
+        return (-1f) * Mathf.Sign(v);
     }
 
     private float GetAbsDiff(float v1, float v2) => Mathf.Abs(Mathf.Abs(v1) - Mathf.Abs(v2));
@@ -272,7 +278,8 @@ public class SteeringBehaviors : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Debug.DrawLine(transform.position, transform.position + (Vector3)steeringForceWorld, Color.yellow);
+        Debug.DrawLine(Vector2.zero, (Vector3)steeringForceWorld, Color.yellow);
+        Debug.DrawLine(transform.position, transform.position + (Vector3)steeringForceLocal, Color.blue);
     }
 
 }

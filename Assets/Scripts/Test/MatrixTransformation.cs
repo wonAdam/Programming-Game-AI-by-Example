@@ -34,6 +34,9 @@ public class MatrixTransformation : MonoBehaviour
                 Quaternion.FromToRotation(Vector3.right, direction), 
                 Vector3.one);
 
+        Vector2 trsTarget = ToLocal.MultiplyPoint3x4(target.position);
+        Debug.DrawLine(Vector2.zero, trsTarget, Color.red);
+
 
         // basis transformation world to local
         Debug.DrawLine(transform.position, ToLocal.MultiplyPoint3x4(Vector3.right), Color.cyan);

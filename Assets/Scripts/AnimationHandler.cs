@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class AnimationHandler : MonoBehaviour
 {
+    public enum Direction { Left, Right }
+    public Direction direction = Direction.Left;
     MovingEntity movingEntity;
-    new Rigidbody2D rigidbody2D;
+    Rigidbody2D rigidbody2D;
     Animator anim;
     // Start is called before the first frame update
+    Vector2 directionVec;
     void Start()
     {
         movingEntity = GetComponent<MovingEntity>();
@@ -18,22 +21,43 @@ public class AnimationHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        SetDirection();
         ProcessMoveAnimation();
     }
 
     private void ProcessMoveAnimation()
     {
-        if (rigidbody2D.velocity.x < 0)
+        
+        if (direction == Direction.Left)
         {
             transform.localScale = new Vector3(-7f, 7f, 7f);
         }
-        else if (rigidbody2D.velocity.x > 0)
+        else if (direction == Direction.Right)
         {
             transform.localScale = new Vector3(7f, 7f, 7f);
         }
 
-
         anim.SetFloat("Speed", rigidbody2D.velocity.magnitude / movingEntity.maxSpeed);
+    }
+
+    private void SetDirection()
+    {
+        directionVec = GetComponent<Rigidbody2D>().velocity;
+
+        if (direction == Direction.Left)
+        {
+            if (Vector2.Dot(Vector2.left, directionVec.normalized) < Mathf.Cos(80f))
+            {
+                direction = Direction.Right;
+            }
+        }
+        else
+        {
+            if (Vector2.Dot(Vector2.right, directionVec.normalized) < Mathf.Cos(80f))
+            {
+                direction = Direction.Left;
+            }
+        }
     }
 
     public void AttackAnimation()
