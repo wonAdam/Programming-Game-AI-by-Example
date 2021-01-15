@@ -340,13 +340,21 @@ public class SteeringBehaviors : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector2 direction = GetComponent<Rigidbody2D>().velocity;
-        Vector2 plus30degree = Quaternion.AngleAxis(30f, Vector3.forward) * direction;
-        Vector2 minus30degree = Quaternion.AngleAxis(-30f, Vector3.forward) * direction;
+        if(state == State.WallAvoidance)
+        {
+            Vector2 direction = GetComponent<Rigidbody2D>().velocity;
+            Vector2 plus30degree = Quaternion.AngleAxis(30f, Vector3.forward) * direction;
+            Vector2 minus30degree = Quaternion.AngleAxis(-30f, Vector3.forward) * direction;
 
+            Debug.DrawLine(transform.position, (Vector2)transform.position + direction.normalized * wallDetectionLength, Color.red);
+            Debug.DrawLine(transform.position, (Vector2)transform.position + plus30degree.normalized * wallDetectionLength, Color.red);
+            Debug.DrawLine(transform.position, (Vector2)transform.position + minus30degree.normalized * wallDetectionLength, Color.red);
+        }
 
-        Debug.DrawLine(transform.position, (Vector2)transform.position + direction.normalized * wallDetectionLength, Color.red);
-        Debug.DrawLine(transform.position, (Vector2)transform.position + plus30degree.normalized * wallDetectionLength, Color.red);
-        Debug.DrawLine(transform.position, (Vector2)transform.position + minus30degree.normalized * wallDetectionLength, Color.red);
+        else
+        {
+            Vector2 direction = GetComponent<Rigidbody2D>().velocity;
+            Debug.DrawLine(transform.position, (Vector2)transform.position + direction, Color.red);
+        }
     }
 }

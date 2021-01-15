@@ -34,6 +34,11 @@ public class ToggleFuncs : MonoBehaviour
         if(toggle.isOn)
             enemy.GetComponent<SteeringBehaviors>().state = SteeringBehaviors.State.Evade;
     }
+    public void OnClick_Wander(Toggle toggle)
+    {
+        if (toggle.isOn)
+            enemy.GetComponent<SteeringBehaviors>().state = SteeringBehaviors.State.Wander;
+    }
 
     public void OnClick_CamToEnemy(Toggle toggle) 
     {
