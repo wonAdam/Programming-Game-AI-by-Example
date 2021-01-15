@@ -217,8 +217,19 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] Collider2D detectedWall;
     private Vector2 WallAvoidance(Vector2 TargetPos)
     {
-        Vector2 direction = TargetPos - (Vector2)transform.position;
+        Vector2 direction = GetComponent<Rigidbody2D>().velocity;
         direction.Normalize();
+
+        // getting stucked situation
+        if(detectedWall && GetComponent<Collider2D>().IsTouching(detectedWall))
+        {
+            List<ContactPoint2D> contactPoints = new List<ContactPoint2D>();
+            GetComponent<Collider2D>().GetContacts(contactPoints);
+            if(contactPoints.Count > 0)
+            {
+                return PerpendicularVectorFrom(contactPoints);
+            }
+        }
 
         //// three way Raycast ////
         List<RaycastHit2D> results = new List<RaycastHit2D>();
@@ -245,7 +256,9 @@ public class SteeringBehaviors : MonoBehaviour
 
         // no wall
         if (results.Count == 0)
+        {
             return Vector2.zero;
+        }
 
         //// get closest wall ////
         RaycastHit2D closestWallHit = results.OrderBy((r) => Vector2.Distance(transform.position, r.transform.position)).ToList()[0];
@@ -261,6 +274,17 @@ public class SteeringBehaviors : MonoBehaviour
 
 
     #region Helper Functions
+    private Vector2 PerpendicularVectorFrom(List<ContactPoint2D> contactPoints)
+    {
+        Vector2 normalFromContact = contactPoints[0].normal;
+        Vector2 ToDetectedWall = detectedWall.transform.position - transform.position;
+
+        Vector2 perp1 = Vector2.Perpendicular(normalFromContact);
+        Vector2 perp2 = -perp1;
+
+        if (Vector2.Dot(ToDetectedWall, perp1) < 0) return perp1.normalized * movingEntity.maxSpeed;
+        else return perp2.normalized * movingEntity.maxSpeed;
+    }
     private Vector2 CalcSteeringLocalForce(float boxLength, Collider2D nearestIntersectingObstacle, Matrix4x4 localToWorld)
     {
         float steeringLocalForceX, steeringLocalForceY;
@@ -316,14 +340,13 @@ public class SteeringBehaviors : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector2 direction = GetComponent<EnemyMover>().targetTr.position - transform.position;
-        direction.Normalize();
+        Vector2 direction = GetComponent<Rigidbody2D>().velocity;
         Vector2 plus30degree = Quaternion.AngleAxis(30f, Vector3.forward) * direction;
         Vector2 minus30degree = Quaternion.AngleAxis(-30f, Vector3.forward) * direction;
 
 
         Debug.DrawLine(transform.position, (Vector2)transform.position + direction.normalized * wallDetectionLength, Color.red);
-        Debug.DrawLine(transform.position, (Vector2)transform.position + plus30degree * wallDetectionLength, Color.red);
-        Debug.DrawLine(transform.position, (Vector2)transform.position + minus30degree * wallDetectionLength, Color.red);
+        Debug.DrawLine(transform.position, (Vector2)transform.position + plus30degree.normalized * wallDetectionLength, Color.red);
+        Debug.DrawLine(transform.position, (Vector2)transform.position + minus30degree.normalized * wallDetectionLength, Color.red);
     }
 }

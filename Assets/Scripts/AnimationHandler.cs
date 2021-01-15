@@ -12,15 +12,17 @@ public class AnimationHandler : MonoBehaviour
     Animator anim;
     // Start is called before the first frame update
     Vector2 directionVec;
+    float originalScale;
     void Start()
     {
+        originalScale = transform.localScale.x;
         movingEntity = GetComponent<MovingEntity>();
         anim = GetComponent<Animator>();
         rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         SetDirection();
         ProcessMoveAnimation();
@@ -31,11 +33,11 @@ public class AnimationHandler : MonoBehaviour
         
         if (direction == Direction.Left)
         {
-            transform.localScale = new Vector3(-7f, 7f, 7f);
+            transform.localScale = new Vector3(-originalScale, originalScale, originalScale);
         }
         else if (direction == Direction.Right)
         {
-            transform.localScale = new Vector3(7f, 7f, 7f);
+            transform.localScale = new Vector3(originalScale, originalScale, originalScale);
         }
 
         anim.SetFloat("Speed", rigidbody2D.velocity.magnitude / movingEntity.maxSpeed);
