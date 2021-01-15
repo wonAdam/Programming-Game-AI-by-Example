@@ -15,11 +15,11 @@
 >## Chapter 3 자동으로 움직이는 Game Agent 구현하기
 Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현해봅니다.
 
-- Seek, Flee, Arrive, Pursuit, Evade, Wander <br>
+- <strong>Seek, Flee, Arrive, Pursuit, Evade, Wander</strong> <br>
 Video: <br>
 Executable: <br>
 
-- Obstacle Avoidance & Wall Avoidance <br>
+- <strong>Obstacle Avoidance & Wall Avoidance</strong> <br>
 책에는 장애물 혹은 벽에 부딪혀 속도가 0이 되는 상황은 다루지 않고 있습니다. <br>
 실제로 책대로 구현하다가 문제를 발견하였고 장애물, 벽과 수직 방향의 추가적인 힘을 주어 해결하였습니다. <br>
 Video: <br>
