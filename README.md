@@ -17,9 +17,6 @@ Executable: <br> <br>
 
 >## Chapter 3 자동으로 움직이는 Game Agent 구현하기
 Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현해봅니다. <br> <br>
-Video: <br>
-Executable: <br> <br>
-
 - <strong>Seek, Flee, Arrive, Pursuit, Evade, Wander</strong> <br>
 Video: <br>
 Executable: <br>
