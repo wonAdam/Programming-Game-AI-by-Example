@@ -9,7 +9,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide
     }
 
     public enum Deceleration
@@ -56,11 +56,14 @@ public class SteeringBehaviors : MonoBehaviour
             case State.Wander:
                 return Wander();
             case State.ObstacleAvoidance:
-                return SeekWithObstacleAvoidance(GetComponent<MovingEntity>().targetTr.position);
+                return ArriveWithObstacleAvoidance(GetComponent<MovingEntity>().targetTr.position);
             case State.WallAvoidance:
-                return SeekWithWallAvoidance(GetComponent<MovingEntity>().targetTr.position);
+                return ArrivekWithWallAvoidance(GetComponent<MovingEntity>().targetTr.position);
             case State.Interpose:
                 return Interpose(GetComponent<InterposePlayer>().agentA, GetComponent<InterposePlayer>().agentB);
+            case State.Hide:
+                Collider2D[] obstacles = FindObjectsOfType<Collider2D>().Where((c) => (1 << c.gameObject.layer & LayerMask.GetMask("Obstacle")) > 0).ToArray();
+                return Hide(GetComponent<MovingEntity>().targetTr.position, obstacles);
             default:
                 return Vector2.zero;
 
@@ -158,9 +161,9 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
     
-    private Vector2 SeekWithObstacleAvoidance(Vector2 TargetPos)
+    private Vector2 ArriveWithObstacleAvoidance(Vector2 TargetPos)
     {
-        Vector2 desiredVelocity = (Seek(TargetPos) + ObstacleAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
+        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + ObstacleAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
@@ -209,9 +212,9 @@ public class SteeringBehaviors : MonoBehaviour
         return steeringForceWorld;
     }
 
-    private Vector2 SeekWithWallAvoidance(Vector2 TargetPos)
+    private Vector2 ArrivekWithWallAvoidance(Vector2 TargetPos)
     {
-        Vector2 desiredVelocity = (Seek(TargetPos) + WallAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
+        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + WallAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
     
@@ -265,8 +268,54 @@ public class SteeringBehaviors : MonoBehaviour
         return Arrive(midPoint, Deceleration.fast);
     }
 
+    [SerializeField] public Vector2 hidingSpot;
+    [SerializeField] public bool hidingSpotChoosed;
+    [SerializeField] public Vector2 targetpos;
+    private Vector2 Hide(Vector2 TargetPos, Collider2D[] obstacles)
+    {
+        targetpos = TargetPos;
+        if (!hidingSpotChoosed)
+        {
+            float distanceToClosest = float.MaxValue;
+
+            Vector2 bestHidingSpot = transform.position;
+
+            foreach (var obstacle in obstacles)
+            {
+                Vector2 hidingSpot = GetHidingPosition(obstacle.transform.position, obstacle.bounds.size.x / 2f, TargetPos);
+
+                float dist = Vector2.Distance(hidingSpot, transform.position);
+
+                if (dist < distanceToClosest)
+                {
+                    distanceToClosest = dist;
+                    bestHidingSpot = hidingSpot;
+                }
+            }
+            this.hidingSpot = bestHidingSpot;
+
+
+            if (bestHidingSpot == (Vector2)transform.position || distanceToClosest == float.MaxValue)
+                return Evade(GetComponent<MovingEntity>().targetTr.GetComponent<Rigidbody2D>());
+
+            hidingSpotChoosed = true;
+        }
+
+        return ArriveWithObstacleAvoidance(hidingSpot);
+    }
 
     #region Helper Functions
+    private Vector2 GetHidingPosition(Vector2 obPos, float obRadius, Vector2 TargetPos)
+    {
+        const float distFromOb = 1f;
+        float distAway = obRadius + distFromOb;
+
+        Vector2 toOb = obPos - TargetPos;
+
+        return (toOb.normalized * distAway) + obPos;
+
+
+    }
     private void ThreeWayRaycastTowardDirection(Vector2 direction, List<RaycastHit2D> results)
     {
         // to direction
