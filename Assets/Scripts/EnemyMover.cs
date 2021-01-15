@@ -5,7 +5,6 @@ using UnityEngine;
 public class EnemyMover : MovingEntity
 {
     public SteeringBehaviors m_pSteering;
-    [SerializeField] public Transform targetTr;
 
     new Rigidbody2D rigidbody2D;
     Animator anim;

@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class MovingEntity : MonoBehaviour
 {
-    public float maxSpeed;
-    public float maxForce;
-    public float maxTurnRate;
+    [SerializeField] public float maxSpeed;
+    [SerializeField] public float maxForce;
+    [SerializeField] public float maxTurnRate;
+    [SerializeField] public Transform targetTr;
+
 }
