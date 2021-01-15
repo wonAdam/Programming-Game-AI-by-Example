@@ -27,7 +27,13 @@ Video: <br>
 Executable: <br> <br>
 <strong>Wall Avoidance</strong> <br>
 Video: <br>
-Executable: <br>
+Executable: <br> <br>
+<strong>Interpose</strong> <br>
+Video: <br>
+Executable: <br> <br>
+<strong>Hide</strong> <br>
+Video: <br>
+Executable: <br> <br>
 
 <br>
 
