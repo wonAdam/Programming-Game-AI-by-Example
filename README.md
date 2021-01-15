@@ -9,7 +9,7 @@
 
 >## Chapter 2 State Machine Agent 구현하기
 기본적인 유한상태기계 모델을 응용하여 상태구동형 에이전트를 구현해봅니다. 
-
+- <strong>West World StateMachine Project</strong> <br>
 Video: <br>
 Executable: <br> <br>
 
