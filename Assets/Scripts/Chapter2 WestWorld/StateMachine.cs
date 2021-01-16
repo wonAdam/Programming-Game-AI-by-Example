@@ -9,9 +9,11 @@ public class StateMachine<T>
     public State<T> previousState = null;
     public State<T> globalState = null;
 
-    public StateMachine(T owner)
+    public StateMachine(T owner, State<T> initialState)
     {
         _owner = owner;
+        currentState = initialState;
+        initialState.Enter(null);
     }
     public void Update()
     {
@@ -23,11 +25,12 @@ public class StateMachine<T>
     public void SetGlobalState(State<T> s) => globalState = s;
     public void ChangeState(State<T> nextState)
     {
-        currentState.Exit();
-        nextState.Enter();
         previousState = currentState;
+        currentState.Exit(nextState);
         currentState = nextState;
+        nextState.Enter(previousState);
     }
     public void RevertToPreviousState() => ChangeState(previousState);
     public bool IsInStateOf(State<T> state) => currentState.GetType() == state.GetType();
+    public bool IsPreviousState(System.Type type) => previousState.GetType() == type;
 }

@@ -4,34 +4,31 @@ using UnityEngine;
 
 public class VisitBankAndDepositGold : State<Miner>
 {
-    Miner _miner;
-    public VisitBankAndDepositGold(Miner miner)
+    public VisitBankAndDepositGold(Miner miner) : base(miner) { }
+
+    public override void Enter(State<Miner> previousState)
     {
-        _miner = miner;
-    }
-    public override void Enter()
-    {
-        _miner.transform.position = _miner.BankPos;
-        _miner.SetTextBox("은행으로 간다.");
+        _owner.transform.position = _owner.BankPos;
+        _owner.SetTextBox("은행으로 간다.");
     }
 
     public override void Execute()
     {
         base.Execute();
 
-        _miner.moneyInBank += _miner.goldCarried;
-        _miner.goldCarried = 0f;
+        _owner.moneyInBank += _owner.goldCarried;
+        _owner.goldCarried = 0f;
 
-        _miner.SetTextBox($"금을 맡긴다. 총 저축량은 {(int)_miner.moneyInBank}이다.");
+        _owner.SetTextBox($"금을 맡긴다. 총 저축량은 {(int)_owner.moneyInBank}이다.");
 
-        if (_miner.AmIRichEnough() && DelayedEnough())
-            _miner.StateMachine.ChangeState(new GoHomeAndSleepTilRested(_miner));
+        if (_owner.AmIRichEnough() && DelayedEnough())
+            _owner.StateMachine.ChangeState(new GoHomeAndSleepTilRested(_owner));
 
-        if (!_miner.AmIRichEnough() && DelayedEnough())
-            _miner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_miner));
+        if (!_owner.AmIRichEnough() && DelayedEnough())
+            _owner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_owner));
     }
 
-    public override void Exit()
+    public override void Exit(State<Miner> nextState)
     {
     }
 }

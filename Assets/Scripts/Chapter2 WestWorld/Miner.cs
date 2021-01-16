@@ -29,8 +29,7 @@ public class Miner : MonoBehaviour
 
     private void Start()
     {
-        StateMachine = new StateMachine<Miner>(this);
-        StateMachine.SetCurrentState(new GoHomeAndSleepTilRested(this));
+        StateMachine = new StateMachine<Miner>(this, new GoHomeAndSleepTilRested(this));
     }
 
     // Update is called once per frame
@@ -46,6 +45,8 @@ public class Miner : MonoBehaviour
     public bool AmIRichEnough() => moneyInBank >= richEnoughGoldAmount;
     public void SetTextBox(string message)
     {
+        if (textbox.text == message) return;
+
         Debug.Log("Bob: " + message);
         textbox.text = message;
     }

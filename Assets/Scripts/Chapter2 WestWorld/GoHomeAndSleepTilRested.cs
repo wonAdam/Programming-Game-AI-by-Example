@@ -4,31 +4,29 @@ using UnityEngine;
 
 public class GoHomeAndSleepTilRested : State<Miner>
 {
-    Miner _miner;
-    public GoHomeAndSleepTilRested(Miner miner)
+    public GoHomeAndSleepTilRested(Miner miner) : base(miner) { }
+
+
+    public override void Enter(State<Miner> previousState)
     {
-        _miner = miner;
-    }
-    public override void Enter()
-    {
-        _miner.transform.position = _miner.HomePos;
-        _miner.SetTextBox("집으로 걸어간다.");
+        _owner.transform.position = _owner.HomePos;
+        _owner.SetTextBox("집으로 걸어간다.");
     }
 
     public override void Execute()
     {
         base.Execute();
 
-        _miner.SetTextBox("쿨쿨...");
+        _owner.SetTextBox("쿨쿨...");
 
-        _miner.fatigue = Mathf.Max(_miner.fatigue - Time.deltaTime, 0f);
+        _owner.fatigue = Mathf.Max(_owner.fatigue - Time.deltaTime, 0f);
 
-        if (_miner.RestWell() && DelayedEnough())
-            _miner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_miner));
+        if (_owner.RestWell() && DelayedEnough())
+            _owner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_owner));
     }
 
-    public override void Exit()
+    public override void Exit(State<Miner> nextState)
     {
-        _miner.SetTextBox("정말 환상적인 낮잠이었구나! 금을 더 캐야 할 시간이다.");
+        _owner.SetTextBox("정말 환상적인 낮잠이었구나! 금을 더 캐야 할 시간이다.");
     }
 }

@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class QuenchThirst : State<Miner>
 {
-    Miner _miner;
-    public QuenchThirst(Miner miner)
+    public QuenchThirst(Miner miner) : base(miner) { }
+
+    public override void Enter(State<Miner> previousState)
     {
-        _miner = miner;
-    }
-    public override void Enter()
-    {
-        _miner.transform.position = _miner.TavernPos;
-        _miner.SetTextBox("목이 마르군! 술집으로 걸어간다.");
+        _owner.transform.position = _owner.TavernPos;
+        _owner.SetTextBox("목이 마르군! 술집으로 걸어간다.");
 
     }
 
@@ -20,16 +17,16 @@ public class QuenchThirst : State<Miner>
     {
         base.Execute();
 
-        _miner.thirst = Mathf.Max(_miner.thirst - Time.deltaTime * 3f, 0f);
+        _owner.thirst = Mathf.Max(_owner.thirst - Time.deltaTime * 3f, 0f);
 
-        _miner.SetTextBox("저게 홀짝 홀짝 마시기에 대단히 좋은 술이군.");
+        _owner.SetTextBox("저게 홀짝 홀짝 마시기에 대단히 좋은 술이군.");
 
 
-        if (DelayedEnough() && _miner.QuenchyEnough())
-            _miner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_miner));
+        if (DelayedEnough() && _owner.QuenchyEnough())
+            _owner.StateMachine.ChangeState(new EnterMineAndDigForNugget(_owner));
     }
 
-    public override void Exit()
+    public override void Exit(State<Miner> nextState)
     {
     }
 }
