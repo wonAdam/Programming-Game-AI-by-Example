@@ -8,7 +8,6 @@ public class MinersWife : MonoBehaviour
 
     StateMachine<MinersWife> stateMachine;
     public StateMachine<MinersWife> StateMachine { get => stateMachine; set => stateMachine = value; }
-    public bool shouldGoToToilet = false;
     [SerializeField] private Transform kitchen;
     [SerializeField] private Transform toilet;
     [SerializeField] private Transform house;
@@ -28,32 +27,7 @@ public class MinersWife : MonoBehaviour
     {
         StateMachine.Update();
     }
-    public void StartPeePeeCoroutine(ref Coroutine coroutine)
-    {
-        coroutine = StartCoroutine(PeePeeCoroutine());
-    }
-    private IEnumerator PeePeeCoroutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-            float prob = Random.Range(0f, 1f);
-            Debug.Log("peepee probability:" + prob);
-            if (prob < 0.1f)
-            {
-                shouldGoToToilet = true;
-                break;
-            }
-        }
-        Debug.Log("PeePeeCoroutine Out ");
-
-    }
-    public void StopPeePeeCoroutine(ref Coroutine coroutine)
-    {
-        shouldGoToToilet = false;
-        StopCoroutine(coroutine);
-    }
-
+    
     public void SetTextBox(string message)
     {
         if (textbox.text == message) return;
