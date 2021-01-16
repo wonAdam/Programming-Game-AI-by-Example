@@ -9,12 +9,14 @@
 
 >## Chapter 2 State Machine Agent 구현하기
 기본적인 유한상태기계 모델을 응용하여 상태구동형 에이전트를 구현해봅니다. 
+- <strong>West World StateMachine Project</strong> <br>
+Video: <br>
+Executable: <br> <br>
 
 <br>
 
 >## Chapter 3 자동으로 움직이는 Game Agent 구현하기
-Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현해봅니다.
-
+Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현해봅니다. <br> <br>
 - <strong>Seek, Flee, Arrive, Pursuit, Evade, Wander</strong> <br>
 Video: <br>
 Executable: <br>
@@ -27,7 +29,13 @@ Video: <br>
 Executable: <br> <br>
 <strong>Wall Avoidance</strong> <br>
 Video: <br>
-Executable: <br>
+Executable: <br> <br>
+- <strong>Interpose</strong> <br>
+Video: <br>
+Executable: <br> <br>
+- <strong>Hide</strong> <br>
+Video: <br>
+Executable: <br> <br>
 
 <br>
 
