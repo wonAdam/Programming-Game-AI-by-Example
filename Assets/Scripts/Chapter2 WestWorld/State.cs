@@ -14,6 +14,7 @@ public abstract class State<T>
     public abstract void Enter(State<T> previousState);
     public virtual void Execute() { delay += Time.deltaTime; }
     public abstract void Exit(State<T> nextState);
+    public abstract bool OnMessage(MessageType type, IMessageSender sender);
     public virtual bool DelayedEnough() => delay >= 5f;
     
 }

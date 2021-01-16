@@ -23,6 +23,16 @@ public class MakingStew : State<MinersWife>
 
     public override void Exit(State<MinersWife> nextState)
     {
-        _owner.SetTextBox("");
+        _owner.SetTextBox("스튜 끓어요!");
+        _owner.SendMessage(MessageType.StewReady, _owner.myHusband);
+    }
+
+    public override bool OnMessage(MessageType type, IMessageSender sender)
+    {
+        switch (type)
+        {
+            default:
+                return false;
+        }
     }
 }

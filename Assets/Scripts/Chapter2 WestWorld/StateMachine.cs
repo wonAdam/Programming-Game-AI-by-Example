@@ -15,6 +15,7 @@ public class StateMachine<T>
         currentState = initialState;
         initialState.Enter(null);
     }
+
     public void Update()
     {
         if (globalState != null) globalState.Execute();
@@ -32,5 +33,6 @@ public class StateMachine<T>
     }
     public void RevertToPreviousState() => ChangeState(previousState);
     public bool IsInStateOf(State<T> state) => currentState.GetType() == state.GetType();
-    public bool IsPreviousState(System.Type type) => previousState.GetType() == type;
+    
+
 }

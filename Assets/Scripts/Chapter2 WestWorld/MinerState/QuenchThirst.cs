@@ -29,4 +29,13 @@ public class QuenchThirst : State<Miner>
     public override void Exit(State<Miner> nextState)
     {
     }
+
+    public override bool OnMessage(MessageType type, IMessageSender sender)
+    {
+        switch (type)
+        {
+            default:
+                return false;
+        }
+    }
 }

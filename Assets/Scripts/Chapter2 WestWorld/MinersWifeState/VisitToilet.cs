@@ -30,4 +30,15 @@ public class VisitToilet : State<MinersWife>
 
     }
 
+    public override bool OnMessage(MessageType type, IMessageSender sender)
+    {
+        switch (type)
+        {
+            case MessageType.HiHoneyImHome:
+                _owner.StateMachine.ChangeState(new MakingStew(_owner));
+                return true;
+            default:
+                return false;
+        }
+    }
 }
