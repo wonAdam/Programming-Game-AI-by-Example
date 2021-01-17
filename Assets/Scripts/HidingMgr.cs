@@ -9,10 +9,18 @@ public class HidingMgr : MonoBehaviour
     [SerializeField] Transform player;
     [SerializeField] Transform enemy;
     [SerializeField] Transform enemyPatrolTarget;
-    private void Start()
+    [SerializeField] public float resetSec;
+    Coroutine resetCoroutine;
+    private void OnEnable()
     {
         obstacles = FindObjectsOfType<Collider2D>().Where((c) => (1 << c.gameObject.layer & LayerMask.GetMask("Obstacle")) > 0).ToArray();
-        StartCoroutine(HidingReset());
+        resetCoroutine = StartCoroutine(HidingReset());
+    }
+
+    private void OnDisable()
+    {
+        resetSec = 0f;
+        StopCoroutine(resetCoroutine);
     }
 
 
@@ -20,8 +28,14 @@ public class HidingMgr : MonoBehaviour
     {
         while(true)
         {
-            yield return new WaitForSeconds(7f);
-            ResetPoses();
+            yield return null;
+            resetSec += Time.deltaTime;
+
+            if (resetSec >= 7f)
+            {
+                resetSec = 0f;
+                ResetPoses();
+            }
         }
     }
 
