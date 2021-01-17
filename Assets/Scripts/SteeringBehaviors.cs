@@ -268,53 +268,101 @@ public class SteeringBehaviors : MonoBehaviour
         return Arrive(midPoint, Deceleration.fast);
     }
 
-    [SerializeField] public Vector2 hidingSpot;
-    [SerializeField] public bool hidingSpotChoosed;
-    [SerializeField] public Vector2 targetpos;
+    [SerializeField] Vector2 prevHidingSpot;
+    [SerializeField] public bool hasHidingSpot = false;
     private Vector2 Hide(Vector2 TargetPos, Collider2D[] obstacles)
     {
-        targetpos = TargetPos;
-        if (!hidingSpotChoosed)
+        // Check if you are in enemy sight or too close
+        // inside sight angle -30degree ~ +30degree
+        bool insideSightAngle;
+        bool insideSightLength;
+        Vector2 enemyFront = movingEntity.targetTr.right;
+        Vector2 enemyToPlayer = (transform.position - movingEntity.targetTr.position);
+        AmIInsideEnemySightRange(out insideSightAngle, out insideSightLength, enemyToPlayer, enemyFront);
+
+        if (NoNeedToHide(insideSightAngle, enemyToPlayer, insideSightLength)) return Vector2.zero;
+
+        // Decide whether should evade or hide
+        Vector2 hidingSpot;
+        if (GetHidingSpot(TargetPos, obstacles, out hidingSpot))
         {
-            float distanceToClosest = float.MaxValue;
-
-            Vector2 bestHidingSpot = transform.position;
-
-            foreach (var obstacle in obstacles)
+            hasHidingSpot = true;
+            if (Vector2.Distance(prevHidingSpot, hidingSpot) > 0.5f)
             {
-                Vector2 hidingSpot = GetHidingPosition(obstacle.transform.position, obstacle.bounds.size.x / 2f, TargetPos);
-
-                float dist = Vector2.Distance(hidingSpot, transform.position);
-
-                if (dist < distanceToClosest)
-                {
-                    distanceToClosest = dist;
-                    bestHidingSpot = hidingSpot;
-                }
+                prevHidingSpot = hidingSpot;
+                return ArriveWithObstacleAvoidance(hidingSpot);
             }
-            this.hidingSpot = bestHidingSpot;
-
-
-            if (bestHidingSpot == (Vector2)transform.position || distanceToClosest == float.MaxValue)
-                return Evade(GetComponent<MovingEntity>().targetTr.GetComponent<Rigidbody2D>());
-
-            hidingSpotChoosed = true;
+            else
+            {
+                return ArriveWithObstacleAvoidance(prevHidingSpot);
+            }
+        }
+        else
+        {
+            hasHidingSpot = false;
+            return Evade(movingEntity.targetTr.GetComponent<Rigidbody2D>());
         }
 
-        return ArriveWithObstacleAvoidance(hidingSpot);
     }
 
+    private void AmIInsideEnemySightRange(out bool insideSightAngle, out bool insideSightLength, Vector2 enemyToPlayer, Vector2 enemyFront)
+    {
+        insideSightAngle = false;
+        if (Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(40f * Mathf.Deg2Rad) &&
+            Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(-40f * Mathf.Deg2Rad))
+            insideSightAngle = true;
+
+        insideSightLength = false;
+        if (enemyToPlayer.magnitude <= movingEntity.targetTr.GetComponent<EnemyMover>().sightLength * 2f)
+            insideSightLength = true;
+    }
+
+    private bool NoNeedToHide(bool insideSightAngle, Vector2 enemyToPlayer, bool insideSightLength)
+    {
+        return !hasHidingSpot && enemyToPlayer.magnitude > 5.5f && !(insideSightAngle && insideSightLength);
+    }
+
+
     #region Helper Functions
+    /// <summary>
+    ///  Get Hiding Position Based on Multiple Obstacles
+    /// </summary>
+    /// <returns>True: if you should evade / False: if you get bestHidingSpot</returns>
+    private bool GetHidingSpot(Vector2 TargetPos, Collider2D[] obstacles, out Vector2 bestHidingSpot)
+    {
+        float distanceToClosest = float.MaxValue;
+
+        bestHidingSpot = new Vector2();
+
+        foreach (var obstacle in obstacles)
+        {
+            Vector2 hidingSpot = GetHidingPosition(obstacle.transform.position, obstacle.bounds.size.x / 2f, TargetPos);
+
+            float dist = Vector2.Distance(hidingSpot, transform.position);
+
+            if (dist < distanceToClosest)
+            {
+                distanceToClosest = dist;
+                bestHidingSpot = hidingSpot;
+            }
+        }
+
+        if (bestHidingSpot == (Vector2)transform.position || distanceToClosest == float.MaxValue)
+            return false;
+
+        return true;
+    }
+    /// <summary>
+    /// Get Hinding Position Based on One Obstacle
+    /// </summary>
     private Vector2 GetHidingPosition(Vector2 obPos, float obRadius, Vector2 TargetPos)
     {
-        const float distFromOb = 1f;
+        const float distFromOb = 0.2f;
         float distAway = obRadius + distFromOb;
 
         Vector2 toOb = obPos - TargetPos;
 
         return (toOb.normalized * distAway) + obPos;
-
-
     }
     private void ThreeWayRaycastTowardDirection(Vector2 direction, List<RaycastHit2D> results)
     {

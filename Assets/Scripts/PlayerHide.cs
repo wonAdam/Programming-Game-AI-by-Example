@@ -24,10 +24,17 @@ public class PlayerHide : MovingEntity
     private void ProcessSteeringBehaviors()
     {
         Vector2 steeringForce = m_pSteering.Calculate();
-        Vector2 acceleration = steeringForce / GetComponent<Rigidbody2D>().mass;
-        rigidbody2D.velocity += acceleration * Time.deltaTime;
-        if (acceleration.magnitude < Mathf.Epsilon)
-            rigidbody2D.velocity -= rigidbody2D.velocity.normalized * Time.deltaTime; // 더해진게 없을 시 감속
+        Vector2 acceleration = new Vector2();
+        if (float.IsNaN(steeringForce.x) || steeringForce == Vector2.zero) 
+            ;
+        else
+        {
+            acceleration = steeringForce / GetComponent<Rigidbody2D>().mass;
+            rigidbody2D.velocity += acceleration * Time.deltaTime;
+        }
+
+        if (acceleration.magnitude < Mathf.Epsilon && rigidbody2D.velocity.magnitude > Mathf.Epsilon)
+            rigidbody2D.velocity -= (rigidbody2D.velocity.normalized * rigidbody2D.velocity.magnitude / 2f) * Time.deltaTime ; // 더해진게 없을 시 감속
 
         rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity, maxSpeed);
     }

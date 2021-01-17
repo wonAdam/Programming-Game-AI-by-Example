@@ -54,7 +54,6 @@ public class MinersWife : MonoBehaviour, IStateMachine<MinersWife>, IMessageSend
 
         messageDispatcher.DispatchMessage(msg, this, receiver);
     }
-
     public bool ReceiveMessage(MessageType msg, IMessageSender sender)
     {
         if (StateMachine.currentState != null &&
@@ -64,7 +63,6 @@ public class MinersWife : MonoBehaviour, IStateMachine<MinersWife>, IMessageSend
 
         return false;
     }
-
     public void RegisterToDispatcher() => messageDispatcher.Register(this);
     public void UnregisterToDispatcher() => messageDispatcher.Unregister(this);
 }

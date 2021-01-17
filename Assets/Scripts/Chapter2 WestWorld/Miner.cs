@@ -44,7 +44,7 @@ public class Miner : MonoBehaviour, IStateMachine<Miner>, IMessageSender, IMessa
 
     private void Start()
     {
-        StateMachine = new StateMachine<Miner>(this, new EnterMineAndDigForNugget(this));
+        StateMachine = new StateMachine<Miner>(this, new GoHomeAndSleepTilRested(this));
     }
 
     // Update is called once per frame

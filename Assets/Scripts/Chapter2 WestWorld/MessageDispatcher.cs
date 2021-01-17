@@ -28,17 +28,29 @@ public class MessageDispatcher : MonoBehaviour
         {
             foreach(var r in this.receivers)
             {
-                r.ReceiveMessage(msg, sender);
+                if (r == null)
+                {
+                    this.receivers.Remove(r);
+                    continue;
+                }
+                else
+                {
+                    r.ReceiveMessage(msg, sender);
+                }
             }
         }
         // msg를 특정한 receiver에게만 보냅니다.
         else
         {
             foreach(var r in this.receivers)
-                if(r == receiver)
+                if(r != null && r == receiver)
                 {
                     r.ReceiveMessage(msg, sender);
                     return;
+                }
+                else if(r == null)
+                {
+                    this.receivers.Remove(r);
                 }
         }
     }
