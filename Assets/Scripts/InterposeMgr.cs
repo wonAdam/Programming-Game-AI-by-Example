@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class InterposeMgr : MonoBehaviour
 {
-    private InterposeAgent agentA;
-    private InterposeAgent agentB;
-    private InterposePlayer player;
+    [SerializeField] AIMover agentA;
+    [SerializeField] AIMover agentB;
+    [SerializeField] AIMover player;
     [SerializeField] public Transform target;
 
     public bool agentAArrived;
@@ -17,18 +17,18 @@ public class InterposeMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InterposeAgent[] agents = FindObjectsOfType<InterposeAgent>();
-        agentA = agents[0];
-        agentB = agents[1];
-        player = FindObjectOfType<InterposePlayer>();
-
         SetAgentPlayerInRandomPos();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!coroutineInProcess && agentAArrived && agentBArrived && playerArrived)
+        if (Vector2.Distance(target.position, player.transform.position) < 1f) playerArrived = true;
+        if (Vector2.Distance(target.position, agentA.transform.position) < 1f) agentAArrived = true;
+        if (Vector2.Distance(target.position, agentB.transform.position) < 1f) agentBArrived = true;
+
+
+        if (!coroutineInProcess && agentAArrived && agentBArrived && playerArrived)
         {
             StartCoroutine(SetNewSceneDelay());
         }

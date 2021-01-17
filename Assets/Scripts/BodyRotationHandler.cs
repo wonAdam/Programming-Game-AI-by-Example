@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InterposeRotationHandler : MonoBehaviour
+public class BodyRotationHandler : MonoBehaviour
 {
     void Update()
     {

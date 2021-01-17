@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+[RequireComponent (typeof(Rigidbody2D))]
 public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
@@ -17,12 +18,11 @@ public class SteeringBehaviors : MonoBehaviour
         fast = 1, normal = 2, slow = 3
     }
 
-    private MovingEntity movingEntity;
     private Vector2 wanderTarget;
     private Collider2D lastTimeObstacle;
     public State state = State.Seek;
 
-    [SerializeField] Deceleration deceleration = Deceleration.slow;
+    [SerializeField] public Deceleration deceleration = Deceleration.slow;
     [SerializeField] float panicDistance = 7f;
     [SerializeField] float wanderRadius;
     [SerializeField] float wanderDistance;
@@ -30,40 +30,38 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] float minDetectionBoxLength; // obstacle
     [SerializeField] float wallDetectionLength; // wall
     [SerializeField] Collider2D detectedWall;
-    private void Start()
-    {
-        movingEntity = GetComponent<MovingEntity>();
-    }
+    [SerializeField] Vector2 prevHidingSpot;
+    [SerializeField] public bool hasHidingSpot = false;
 
     /// <summary>
     /// State에 따른 적절한 다음 MovingEntity에 줘야할 Force를 리턴합니다.
     /// </summary>
     /// <returns></returns>
-    public Vector2 Calculate()
+    public Vector2 Calculate(MovingEntity movingEntity)
     {
         switch (state)
         {
             case State.Seek:
-                return Seek(GetComponent<MovingEntity>().targetTr.position);
+                return Seek(movingEntity.target.position, movingEntity);
             case State.Flee:
-                return Flee(GetComponent<MovingEntity>().targetTr.position);
+                return Flee(movingEntity.target.position, movingEntity);
             case State.Arrive:
-                return Arrive(GetComponent<MovingEntity>().targetTr.position, deceleration);
+                return Arrive(movingEntity.target.position, deceleration);
             case State.Pursuit:
-                return Pursuit(GetComponent<MovingEntity>().targetTr.GetComponent<Rigidbody2D>());
+                return Pursuit(movingEntity.target, movingEntity);
             case State.Evade:
-                return Evade(GetComponent<MovingEntity>().targetTr.GetComponent<Rigidbody2D>());
+                return Evade(movingEntity.target, movingEntity);
             case State.Wander:
                 return Wander();
             case State.ObstacleAvoidance:
-                return ArriveWithObstacleAvoidance(GetComponent<MovingEntity>().targetTr.position);
+                return ArriveWithObstacleAvoidance(movingEntity.target.position, movingEntity);
             case State.WallAvoidance:
-                return ArrivekWithWallAvoidance(GetComponent<MovingEntity>().targetTr.position);
+                return ArriveWithWallAvoidance(GetComponent<MovingEntity>().target.position, movingEntity);
             case State.Interpose:
-                return Interpose(GetComponent<InterposePlayer>().agentA, GetComponent<InterposePlayer>().agentB);
+                return Interpose(GetComponent<AIMover>().agentA.transform, GetComponent<AIMover>().agentB.transform, movingEntity);
             case State.Hide:
-                Collider2D[] obstacles = FindObjectsOfType<Collider2D>().Where((c) => (1 << c.gameObject.layer & LayerMask.GetMask("Obstacle")) > 0).ToArray();
-                return Hide(GetComponent<MovingEntity>().targetTr.position, obstacles);
+                Collider2D[] obstacles = GetAllObstacles();
+                return Hide(movingEntity.target, obstacles, movingEntity);
             default:
                 return Vector2.zero;
 
@@ -71,20 +69,23 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
-    private Vector2 Seek(Vector2 TargetPos)
+    
+
+    private Vector2 Seek(Vector2 targetPos, MovingEntity movingEntity)
     {
         Vector2 desiredVelocity = 
-            (TargetPos - (Vector2)transform.position).normalized * movingEntity.maxSpeed;
+            (targetPos - (Vector2)transform.position).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
-    private Vector2 Flee(Vector2 TargetPos)
+    private Vector2 Flee(Vector2 targetPos, MovingEntity  movingEntity)
     {
-        if(Vector2.Distance(TargetPos, transform.position) > panicDistance)
+
+        if (Vector2.Distance(targetPos, transform.position) > panicDistance)
         {
             return Vector2.zero;
         }
-        Vector2 desiredVelocity = ((Vector2)transform.position - TargetPos).normalized * movingEntity.maxSpeed;
+        Vector2 desiredVelocity = ((Vector2)transform.position - targetPos).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
@@ -112,8 +113,9 @@ public class SteeringBehaviors : MonoBehaviour
         return Vector2.zero;
     }
 
-    private Vector2 Pursuit(Rigidbody2D evader)
+    private Vector2 Pursuit(Transform target, MovingEntity movingEntity)
     {
+        Rigidbody2D evader = target.GetComponent<Rigidbody2D>();
         Vector2 ToEvader = evader.transform.position - transform.position;
         Vector2 evaderHeading = evader.velocity.normalized;
         Vector2 selfHeading = this.GetComponent<Rigidbody2D>().velocity.normalized;
@@ -123,22 +125,24 @@ public class SteeringBehaviors : MonoBehaviour
             relativeHeading < Mathf.Cos(160f)) // 서로의 방향이 160도를 넘을 시
         {
             // 그냥 evader의 위치로 Seek
-            return Seek(evader.transform.position);
+            return Seek(evader.transform.position, movingEntity);
         }
 
         float lookAheadTime = ToEvader.magnitude / (GetComponent<MovingEntity>().maxSpeed + evader.velocity.magnitude);
 
-        return Seek((Vector2)evader.transform.position + evader.velocity * lookAheadTime);
+        return Seek((Vector2)evader.transform.position + evader.velocity * lookAheadTime, movingEntity);
     }
 
-    private Vector2 Evade(Rigidbody2D pursuer)
+    private Vector2 Evade(Transform target, MovingEntity movingEntity)
     {
+        Rigidbody2D pursuer = target.GetComponent<Rigidbody2D>();
+
         Vector2 ToPursuer = pursuer.transform.position - transform.position;
 
         float lookAheadTime = ToPursuer.magnitude /
             (movingEntity.maxSpeed + pursuer.GetComponent<MovingEntity>().maxSpeed);
 
-        return Flee((Vector2)pursuer.transform.position + pursuer.velocity * lookAheadTime);
+        return Flee((Vector2)pursuer.transform.position + pursuer.velocity * lookAheadTime, movingEntity);
     }
     
     private Vector2 Wander()
@@ -161,19 +165,19 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
     
-    private Vector2 ArriveWithObstacleAvoidance(Vector2 TargetPos)
+    private Vector2 ArriveWithObstacleAvoidance(Vector2 TargetPos, MovingEntity movingEntity)
     {
-        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + ObstacleAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
+        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + ObstacleAvoidance(TargetPos, movingEntity)).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
 
-    private Vector2 ObstacleAvoidance(Vector2 TargetPos)
+    private Vector2 ObstacleAvoidance(Vector2 TargetPos, MovingEntity movingEntity)
     {
         // Cast DetectionBox
         // Mark All Obstacles within the DetectionBox
         Vector2 direction = TargetPos - (Vector2)transform.position;
         List<RaycastHit2D> results = new List<RaycastHit2D>();
-        float boxLength = CalcBoxLength();
+        float boxLength = CalcBoxLength(movingEntity);
         GetComponent<Collider2D>().Cast(direction, GetContactFilter2D("Obstacle"), results, boxLength);
 
         Matrix4x4 localToWorld = Matrix4x4.TRS(
@@ -185,7 +189,7 @@ public class SteeringBehaviors : MonoBehaviour
         // no obstacle front
         if (results.Count == 0)
         {
-            return Seek(TargetPos);
+            return Seek(TargetPos, movingEntity);
         }
         // getting stucked
         if(lastTimeObstacle != null && GetComponent<Collider2D>().IsTouching(lastTimeObstacle))
@@ -212,13 +216,13 @@ public class SteeringBehaviors : MonoBehaviour
         return steeringForceWorld;
     }
 
-    private Vector2 ArrivekWithWallAvoidance(Vector2 TargetPos)
+    private Vector2 ArriveWithWallAvoidance(Vector2 TargetPos, MovingEntity movingEntity)
     {
-        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + WallAvoidance(TargetPos)).normalized * movingEntity.maxSpeed;
+        Vector2 desiredVelocity = (Arrive(TargetPos, deceleration) + WallAvoidance(TargetPos, movingEntity)).normalized * movingEntity.maxSpeed;
         return desiredVelocity - GetComponent<Rigidbody2D>().velocity;
     }
     
-    private Vector2 WallAvoidance(Vector2 TargetPos)
+    private Vector2 WallAvoidance(Vector2 TargetPos, MovingEntity movingEntity)
     {
         Vector2 direction = GetComponent<Rigidbody2D>().velocity;
         direction.Normalize();
@@ -230,7 +234,7 @@ public class SteeringBehaviors : MonoBehaviour
             GetComponent<Collider2D>().GetContacts(contactPoints);
             if (contactPoints.Count > 0)
             {
-                return PerpendicularVectorFrom(contactPoints);
+                return PerpendicularVectorFrom(contactPoints, movingEntity);
             }
         }
 
@@ -254,76 +258,75 @@ public class SteeringBehaviors : MonoBehaviour
         return steeringForce;
     }
 
-    private Vector2 Interpose(MovingEntity AgentA, MovingEntity AgentB)
+    private Vector2 Interpose(Transform AgentA, Transform AgentB, MovingEntity movingEntity)
     {
         Vector2 midPoint = (AgentA.transform.position - AgentB.transform.position) / 2.0f;
 
         float timeToReachMidPoint = (midPoint - (Vector2)transform.position).magnitude / movingEntity.maxSpeed;
 
-        Vector2 aPos = (Vector2)AgentA.transform.position + AgentA.GetComponent<Rigidbody2D>().velocity * timeToReachMidPoint;
-        Vector2 bPos = (Vector2)AgentB.transform.position + AgentB.GetComponent<Rigidbody2D>().velocity * timeToReachMidPoint;
+        Vector2 aPos = (Vector2)AgentA.position + AgentA.GetComponent<Rigidbody2D>().velocity * timeToReachMidPoint;
+        Vector2 bPos = (Vector2)AgentB.position + AgentB.GetComponent<Rigidbody2D>().velocity * timeToReachMidPoint;
 
         midPoint = (aPos + bPos) / 2.0f;
 
         return Arrive(midPoint, Deceleration.fast);
     }
 
-    [SerializeField] Vector2 prevHidingSpot;
-    [SerializeField] public bool hasHidingSpot = false;
-    private Vector2 Hide(Vector2 TargetPos, Collider2D[] obstacles)
+    private Vector2 Hide(Transform target, Collider2D[] obstacles, MovingEntity movingEntity)
     {
         // Check if you are in enemy sight or too close
         // inside sight angle -30degree ~ +30degree
         bool insideSightAngle;
         bool insideSightLength;
-        Vector2 enemyFront = movingEntity.targetTr.right;
-        Vector2 enemyToPlayer = (transform.position - movingEntity.targetTr.position);
-        AmIInsideEnemySightRange(out insideSightAngle, out insideSightLength, enemyToPlayer, enemyFront);
+        Vector2 enemyFront = target.right;
+        Vector2 enemyToPlayer = (transform.position - target.position);
+        AmIInsideEnemySightRange(out insideSightAngle, out insideSightLength, enemyToPlayer, enemyFront, target.GetComponent<MovingEntity>());
 
         if (NoNeedToHide(insideSightAngle, enemyToPlayer, insideSightLength)) return Vector2.zero;
 
         // Decide whether should evade or hide
         Vector2 hidingSpot;
-        if (GetHidingSpot(TargetPos, obstacles, out hidingSpot))
+        if (GetHidingSpot(target.position, obstacles, out hidingSpot))
         {
             hasHidingSpot = true;
             if (Vector2.Distance(prevHidingSpot, hidingSpot) > 0.5f)
             {
                 prevHidingSpot = hidingSpot;
-                return ArriveWithObstacleAvoidance(hidingSpot);
+                return ArriveWithObstacleAvoidance(hidingSpot, movingEntity);
             }
             else
             {
-                return ArriveWithObstacleAvoidance(prevHidingSpot);
+                return ArriveWithObstacleAvoidance(prevHidingSpot, movingEntity);
             }
         }
         else
         {
             hasHidingSpot = false;
-            return Evade(movingEntity.targetTr.GetComponent<Rigidbody2D>());
+            return Evade(target, movingEntity);
         }
 
     }
 
-    private void AmIInsideEnemySightRange(out bool insideSightAngle, out bool insideSightLength, Vector2 enemyToPlayer, Vector2 enemyFront)
+
+    #region Helper Functions
+
+    private static Collider2D[] GetAllObstacles() => FindObjectsOfType<Collider2D>().Where((c) => (1 << c.gameObject.layer & LayerMask.GetMask("Obstacle")) > 0).ToArray();
+    private void AmIInsideEnemySightRange(out bool insideSightAngle, out bool insideSightLength, Vector2 enemyToPlayer, Vector2 enemyFront, MovingEntity target)
     {
         insideSightAngle = false;
-        if (Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(40f * Mathf.Deg2Rad) &&
-            Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(-40f * Mathf.Deg2Rad))
+        if (Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(target.sightAngle * Mathf.Deg2Rad) &&
+            Vector2.Dot(enemyFront.normalized, enemyToPlayer.normalized) > Mathf.Cos(-target.sightAngle * Mathf.Deg2Rad))
             insideSightAngle = true;
 
         insideSightLength = false;
-        if (enemyToPlayer.magnitude <= movingEntity.targetTr.GetComponent<EnemyMover>().sightLength * 2f)
+        if (enemyToPlayer.magnitude <= target.sightLength * 2f)
             insideSightLength = true;
     }
-
     private bool NoNeedToHide(bool insideSightAngle, Vector2 enemyToPlayer, bool insideSightLength)
     {
         return !hasHidingSpot && enemyToPlayer.magnitude > 5.5f && !(insideSightAngle && insideSightLength);
     }
 
-
-    #region Helper Functions
     /// <summary>
     ///  Get Hiding Position Based on Multiple Obstacles
     /// </summary>
@@ -386,7 +389,7 @@ public class SteeringBehaviors : MonoBehaviour
             foreach (var hit in hits2D)
                 results.Add(hit);
     }
-    private Vector2 PerpendicularVectorFrom(List<ContactPoint2D> contactPoints)
+    private Vector2 PerpendicularVectorFrom(List<ContactPoint2D> contactPoints, MovingEntity movingEntity)
     {
         Vector2 normalFromContact = contactPoints[0].normal;
         Vector2 ToDetectedWall = detectedWall.transform.position - transform.position;
@@ -446,7 +449,7 @@ public class SteeringBehaviors : MonoBehaviour
         
         return contactFilter2D;
     }
-    private float CalcBoxLength() => minDetectionBoxLength + (GetComponent<Rigidbody2D>().velocity.magnitude / movingEntity.maxSpeed) * minDetectionBoxLength;
+    private float CalcBoxLength(MovingEntity movingEntity) => minDetectionBoxLength + (GetComponent<Rigidbody2D>().velocity.magnitude / movingEntity.maxSpeed) * minDetectionBoxLength;
     #endregion
 
 

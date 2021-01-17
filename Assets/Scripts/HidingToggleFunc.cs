@@ -6,16 +6,16 @@ using UnityEngine.UI;
 public class HidingToggleFunc : MonoBehaviour
 {
     [SerializeField] HidingMgr hidingMgr;
-    [SerializeField] PlayerMover playerMover;
-    [SerializeField] EnemyMover enemyMover;
+    [SerializeField] AIMover seeker;
+    [SerializeField] ControllerMover seekerController;
 
     public void OnToggle_Auto(Toggle toggle)
     {
         if (toggle.isOn)
         {
             hidingMgr.enabled = true;
-            playerMover.enabled = false;
-            enemyMover.enabled = true;
+            seekerController.enabled = false;
+            seeker.enabled = true;
         }
     }
     public void OnToggle_Control(Toggle toggle)
@@ -23,8 +23,8 @@ public class HidingToggleFunc : MonoBehaviour
         if(toggle.isOn)
         {
             hidingMgr.enabled = false;
-            playerMover.enabled = true;
-            enemyMover.enabled = false;
+            seekerController.enabled = true;
+            seeker.enabled = false;
         }
     }
 }

@@ -7,6 +7,10 @@ public class MovingEntity : MonoBehaviour
     [SerializeField] public float maxSpeed;
     [SerializeField] public float maxForce;
     [SerializeField] public float maxTurnRate;
-    [SerializeField] public Transform targetTr;
+    [SerializeField] public Transform target;
 
+
+    [Header("Only For Seeker in Hide Mode")]
+    [SerializeField] public float sightAngle;
+    [SerializeField] public float sightLength;
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMover : MovingEntity
+public class ControllerMover : MovingEntity
 {
     Rigidbody2D rigidbody2D;
     AnimationHandler animHandler;
@@ -31,7 +31,8 @@ public class PlayerMover : MovingEntity
     }
     private void OnDrawGizmos()
     {
-        rigidbody2D = GetComponent<Rigidbody2D>();
+        if (!rigidbody2D) rigidbody2D = GetComponent<Rigidbody2D>();
+
         Debug.DrawLine(transform.position, (Vector2)transform.position + rigidbody2D.velocity, Color.red);
     }
 }
