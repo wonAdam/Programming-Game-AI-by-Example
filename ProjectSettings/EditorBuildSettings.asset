@@ -12,21 +12,24 @@ EditorBuildSettings:
     path: Assets/Scenes/Chapter2/WestWorld.unity
     guid: 2598a32d91a5d2d4b8b3a21f1d425593
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3BasicSteering.unity
+    path: Assets/Scenes/Chapter3/BasicSteering.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3Hide.unity
+    path: Assets/Scenes/Chapter3/Hide.unity
     guid: 5096c83b21a1bac40bc5339c0f68ef89
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3Interpose.unity
+    path: Assets/Scenes/Chapter3/Interpose.unity
     guid: 2d29a396a67ea3f42a5d5ca3898f14b6
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3ObstacleAvoidance.unity
+    path: Assets/Scenes/Chapter3/ObstacleAvoidance.unity
     guid: ad0e0527bc7ceb84f8d5ff1c57cd25e4
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3WallAvoidance.unity
+    path: Assets/Scenes/Chapter3/WallAvoidance.unity
     guid: 034f3ceae2f378a46948bd179a04e628
   - enabled: 1
-    path: Assets/Scenes/Chapter3/Chapter3FollowPath.unity
+    path: Assets/Scenes/Chapter3/FollowPath.unity
     guid: 92971fe2e444d0e43a61a8072c5ecab8
+  - enabled: 1
+    path: Assets/Scenes/Chapter3/OffsetPursuit.unity
+    guid: d0bcf7b944d5ca141869f03f1c7cae30
   m_configObjects: {}

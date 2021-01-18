@@ -10,7 +10,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide, FollowPath
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide, FollowPath, OffsetPursuit
     }
 
     public enum Deceleration
@@ -64,6 +64,8 @@ public class SteeringBehaviors : MonoBehaviour
                 return Hide(movingEntity.target, obstacles, movingEntity);
             case State.FollowPath:
                 return FollowPath(movingEntity);
+            case State.OffsetPursuit:
+                return OffsetPursuit(movingEntity);
             default:
                 return Vector2.zero;
 
@@ -72,32 +74,6 @@ public class SteeringBehaviors : MonoBehaviour
     }
 
     public Waypoint destWaypoint = null;
-    private Vector2 FollowPath(MovingEntity movingEntity)
-    {
-        if (movingEntity.path == null) return Vector2.zero;
-
-        if (destWaypoint == null) // pick nearest
-            destWaypoint = movingEntity.path.GetNearestWaypoint(transform.position);
-
-        // goto destination waypoint
-        if (Vector2.Distance(destWaypoint.transform.position, transform.position) < 0.4f)
-        {
-            Waypoint nextDestWaypoint = movingEntity.path.GetNextWaypoint(destWaypoint);
-            if (nextDestWaypoint != null)
-            {
-                destWaypoint = nextDestWaypoint;
-                return Arrive(destWaypoint.transform.position, deceleration);
-            }
-            else
-            {
-                return Arrive(destWaypoint.transform.position, deceleration);
-            }
-        }
-        else
-        {
-            return Arrive(destWaypoint.transform.position, deceleration);
-        }
-    }
 
     private Vector2 Seek(Vector2 targetPos, MovingEntity movingEntity)
     {
@@ -333,6 +309,47 @@ public class SteeringBehaviors : MonoBehaviour
             return Evade(target, movingEntity);
         }
 
+    }
+
+    private Vector2 FollowPath(MovingEntity movingEntity)
+    {
+        if (movingEntity.path == null) return Vector2.zero;
+
+        if (destWaypoint == null) // pick nearest
+            destWaypoint = movingEntity.path.GetNearestWaypoint(transform.position);
+
+        // goto destination waypoint
+        if (Vector2.Distance(destWaypoint.transform.position, transform.position) < 0.4f)
+        {
+            Waypoint nextDestWaypoint = movingEntity.path.GetNextWaypoint(destWaypoint);
+            if (nextDestWaypoint != null)
+            {
+                destWaypoint = nextDestWaypoint;
+                return Arrive(destWaypoint.transform.position, deceleration);
+            }
+            else
+            {
+                return Arrive(destWaypoint.transform.position, deceleration);
+            }
+        }
+        else
+        {
+            return Arrive(destWaypoint.transform.position, deceleration);
+        }
+    }
+
+    private Vector2 OffsetPursuit(MovingEntity movingEntity)
+    {
+        Matrix4x4 leaderSpaceToWorldSpace = Matrix4x4.TRS(
+                movingEntity.leader.transform.position - Vector3.zero,
+                Quaternion.FromToRotation(Vector3.right, movingEntity.leader.transform.right),
+                Vector3.one
+                );
+        Vector2 desiredPos = leaderSpaceToWorldSpace.MultiplyPoint3x4(movingEntity.localOffsetInLeaderSpace);
+
+        Vector2 ToOffset = desiredPos - (Vector2)transform.position;
+        float lookAheadTime = ToOffset.magnitude / (movingEntity.maxSpeed + movingEntity.leader.maxSpeed);
+        return Arrive(desiredPos + movingEntity.leader.GetComponent<Rigidbody2D>().velocity * lookAheadTime, Deceleration.fast);
     }
 
 

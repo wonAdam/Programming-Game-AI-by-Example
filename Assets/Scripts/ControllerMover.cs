@@ -18,15 +18,15 @@ public class ControllerMover : MovingEntity
         h = Input.GetAxis("Horizontal");
 
         // TODO - should seperate from mover
-        if(Input.GetKeyDown(KeyCode.Space))
+        if(animHandler && Input.GetKeyDown(KeyCode.Space))
         {
             animHandler.AttackAnimation();
         }
     }
 
-    void FixedUpdate()
+    void LateUpdate()
     {
-        Vector2 velocity = new Vector2(h, v).normalized * maxSpeed;
+        Vector2 velocity = (new Vector2(h, v) * Time.deltaTime).normalized * maxSpeed;
         rigidbody2D.velocity = velocity;
     }
     private void OnDrawGizmos()

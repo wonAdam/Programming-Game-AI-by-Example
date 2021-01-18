@@ -5,15 +5,16 @@ using UnityEngine;
 [RequireComponent (typeof(Rigidbody2D), typeof(SteeringBehaviors))]
 public class AIMover : MovingEntity
 {
-    public SteeringBehaviors steeringBehavior;
-    Rigidbody2D rigidbody2D;
+    private SteeringBehaviors steeringBehavior;
+    private Rigidbody2D rigidbody2D;
 
     [Header ("Only for Player in Interpose Mode")]
     [SerializeField] public MovingEntity agentA;
     [SerializeField] public MovingEntity agentB;
 
-    private void Start()
+    public override void Start()
     {
+        base.Start();
         steeringBehavior = GetComponent<SteeringBehaviors>();
         rigidbody2D = GetComponent<Rigidbody2D>();
     }
