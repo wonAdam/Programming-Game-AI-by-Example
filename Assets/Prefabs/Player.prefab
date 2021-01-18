@@ -106,7 +106,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!95 &1989160269875289590
 Animator:
   serializedVersion: 3
@@ -141,6 +141,10 @@ MonoBehaviour:
   maxSpeed: 3
   maxForce: 0
   maxTurnRate: 0
+  target: {fileID: 0}
+  path: {fileID: 0}
+  sightAngle: 0
+  sightLength: 0
 --- !u!114 &1989160269875289591
 MonoBehaviour:
   m_ObjectHideFlags: 0

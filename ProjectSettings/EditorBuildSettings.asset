@@ -26,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Chapter3/Chapter3WallAvoidance.unity
     guid: 034f3ceae2f378a46948bd179a04e628
+  - enabled: 1
+    path: Assets/Scenes/Chapter3/Chapter3FollowPath.unity
+    guid: 92971fe2e444d0e43a61a8072c5ecab8
   m_configObjects: {}

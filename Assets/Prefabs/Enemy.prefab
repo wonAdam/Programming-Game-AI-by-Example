@@ -108,7 +108,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!95 &1727321378370613014
 Animator:
   serializedVersion: 3
@@ -169,8 +169,13 @@ MonoBehaviour:
   maxSpeed: 3
   maxForce: 0
   maxTurnRate: 0
-  m_pSteering: {fileID: 0}
-  targetTr: {fileID: 0}
+  target: {fileID: 0}
+  path: {fileID: 0}
+  sightAngle: 0
+  sightLength: 0
+  steeringBehavior: {fileID: 0}
+  agentA: {fileID: 0}
+  agentB: {fileID: 0}
 --- !u!114 &1727321378370613015
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,6 +197,9 @@ MonoBehaviour:
   minDetectionBoxLength: 2
   wallDetectionLength: 4
   detectedWall: {fileID: 0}
+  prevHidingSpot: {x: 0, y: 0}
+  hasHidingSpot: 0
+  destWaypoint: {fileID: 0}
 --- !u!114 &1727321378370613033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,5 +212,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4bc3aded87b9342983e099ba5b4d5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  angleSensitivity: 10
+  angleSensitivity: 40
   direction: 0

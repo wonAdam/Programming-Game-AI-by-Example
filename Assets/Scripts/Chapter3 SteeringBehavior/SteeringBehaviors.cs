@@ -10,7 +10,7 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide, FollowPath
     }
 
     public enum Deceleration
@@ -62,6 +62,8 @@ public class SteeringBehaviors : MonoBehaviour
             case State.Hide:
                 Collider2D[] obstacles = GetAllObstacles();
                 return Hide(movingEntity.target, obstacles, movingEntity);
+            case State.FollowPath:
+                return FollowPath(movingEntity);
             default:
                 return Vector2.zero;
 
@@ -69,7 +71,33 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
-    
+    public Waypoint destWaypoint = null;
+    private Vector2 FollowPath(MovingEntity movingEntity)
+    {
+        if (movingEntity.path == null) return Vector2.zero;
+
+        if (destWaypoint == null) // pick nearest
+            destWaypoint = movingEntity.path.GetNearestWaypoint(transform.position);
+
+        // goto destination waypoint
+        if (Vector2.Distance(destWaypoint.transform.position, transform.position) < 0.4f)
+        {
+            Waypoint nextDestWaypoint = movingEntity.path.GetNextWaypoint(destWaypoint);
+            if (nextDestWaypoint != null)
+            {
+                destWaypoint = nextDestWaypoint;
+                return Arrive(destWaypoint.transform.position, deceleration);
+            }
+            else
+            {
+                return Arrive(destWaypoint.transform.position, deceleration);
+            }
+        }
+        else
+        {
+            return Arrive(destWaypoint.transform.position, deceleration);
+        }
+    }
 
     private Vector2 Seek(Vector2 targetPos, MovingEntity movingEntity)
     {
