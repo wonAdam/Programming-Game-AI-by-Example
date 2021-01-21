@@ -10,7 +10,9 @@ public class SteeringBehaviors : MonoBehaviour
 {
     public enum State
     {
-        Seek, Flee, Arrive, Pursuit, Evade, Wander, ObstacleAvoidance, WallAvoidance, Interpose, Hide, FollowPath, OffsetPursuit
+        Seek, Flee, Arrive, Pursuit, Evade, Wander, 
+        ObstacleAvoidance, WallAvoidance, Interpose, 
+        Hide, FollowPath, OffsetPursuit, Cohesion, Separation, Alignment  
     }
 
     public enum Deceleration
@@ -21,6 +23,8 @@ public class SteeringBehaviors : MonoBehaviour
     private Vector2 wanderTarget;
     private Collider2D lastTimeObstacle;
     public State state = State.Seek;
+    public Type tagType;
+    //public Dictionary<this.tagType, >
 
     [SerializeField] public Deceleration deceleration = Deceleration.slow;
     [SerializeField] float panicDistance = 7f;
@@ -32,12 +36,15 @@ public class SteeringBehaviors : MonoBehaviour
     [SerializeField] Collider2D detectedWall;
     [SerializeField] Vector2 prevHidingSpot;
     [SerializeField] public bool hasHidingSpot = false;
+    [SerializeField] public float groupBehaviorRadius;
+    [SerializeField] public float groupBehaviorFOV;
+    public Waypoint destWaypoint = null;
 
     /// <summary>
     /// State에 따른 적절한 다음 MovingEntity에 줘야할 Force를 리턴합니다.
     /// </summary>
     /// <returns></returns>
-    public Vector2 Calculate(MovingEntity movingEntity)
+    public virtual Vector2 Calculate(MovingEntity movingEntity)
     {
         switch (state)
         {
@@ -66,6 +73,21 @@ public class SteeringBehaviors : MonoBehaviour
                 return FollowPath(movingEntity);
             case State.OffsetPursuit:
                 return OffsetPursuit(movingEntity);
+            case State.Cohesion:
+                {
+                    List<MovingEntity> neighbors = TagNeighbors(movingEntity, NeighborPredicate);
+                    return Cohesion(movingEntity, neighbors);
+                }
+            case State.Separation:
+                {
+                    List<MovingEntity> neighbors = TagNeighbors(movingEntity, NeighborPredicate);
+                    return Separation(movingEntity, neighbors);
+                }
+            case State.Alignment:
+                {
+                    List<MovingEntity> neighbors = TagNeighbors(movingEntity, NeighborPredicate);
+                    return Alignment(movingEntity, neighbors);
+                }
             default:
                 return Vector2.zero;
 
@@ -73,7 +95,6 @@ public class SteeringBehaviors : MonoBehaviour
 
     }
 
-    public Waypoint destWaypoint = null;
 
     private Vector2 Seek(Vector2 targetPos, MovingEntity movingEntity)
     {
@@ -352,9 +373,61 @@ public class SteeringBehaviors : MonoBehaviour
         return Arrive(desiredPos + movingEntity.leader.GetComponent<Rigidbody2D>().velocity * lookAheadTime, Deceleration.fast);
     }
 
+    private Vector2 Cohesion(MovingEntity movingEntity, List<MovingEntity> neighbors)
+    {
+        if (neighbors.Count == 0) return Vector2.zero;
+
+        Vector2 centerOfMass = Vector2.zero;
+
+        foreach(var neighbor in neighbors)
+            centerOfMass += (Vector2)neighbor.transform.position;
+
+        centerOfMass /= neighbors.Count;
+        return Arrive(centerOfMass, deceleration);
+    }
+
+    private Vector2 Alignment(MovingEntity movingEntity, List<MovingEntity> neighbors)
+    {
+        Vector2 averageHeading = Vector2.zero;
+
+        foreach (var neighbor in neighbors)
+            averageHeading += (Vector2)neighbor.transform.right;
+
+        averageHeading /= neighbors.Count;
+
+        return averageHeading - (Vector2)transform.right;
+    }
+
+    private Vector2 Separation(MovingEntity movingEntity, List<MovingEntity> neighbors)
+    {
+        Vector2 steeringForce = Vector2.zero;
+
+        foreach(var neighbor in neighbors)
+        {
+            Vector2 ToAgent = transform.position - neighbor.transform.position;
+
+            steeringForce += ToAgent.normalized / ToAgent.magnitude;
+        }
+
+        return steeringForce;
+    }
+
 
     #region Helper Functions
+    private List<MovingEntity> TagNeighbors(MovingEntity movingEntity, Predicate<MovingEntity> IsAgent)
+    {
+        List<MovingEntity> result = new List<MovingEntity>();
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(movingEntity.transform.position, groupBehaviorRadius);
 
+        foreach (var collider in colliders)
+            if (collider.GetComponent<MovingEntity>() != null &&
+                collider.GetComponent<MovingEntity>() != movingEntity &&
+                IsAgent(collider.GetComponent<MovingEntity>()))
+                result.Add(collider.GetComponent<MovingEntity>());
+
+        return result;
+    }
+    private bool NeighborPredicate(MovingEntity neighborMovingEntity) => true;
     private static Collider2D[] GetAllObstacles() => FindObjectsOfType<Collider2D>().Where((c) => (1 << c.gameObject.layer & LayerMask.GetMask("Obstacle")) > 0).ToArray();
     private void AmIInsideEnemySightRange(out bool insideSightAngle, out bool insideSightLength, Vector2 enemyToPlayer, Vector2 enemyFront, MovingEntity target)
     {

@@ -27,6 +27,8 @@ public abstract class MovingEntity : MonoBehaviour
 
     public void SetOffsetFromLeader()
     {
+        if (leader == null) return;
+
         Matrix4x4 worldSpaceToLeaderSpace = Matrix4x4.TRS(
                 Vector3.zero - leader.transform.position,
                 Quaternion.FromToRotation(leader.transform.right, Vector3.right),

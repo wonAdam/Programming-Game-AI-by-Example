@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 1878099975472938056}
   - component: {fileID: 1878099975472938055}
   m_Layer: 0
-  m_Name: InterposePlayer
+  m_Name: Agent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -263,7 +263,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &1878099975472938055
 MonoBehaviour:
   m_ObjectHideFlags: 0
