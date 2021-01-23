@@ -32,6 +32,12 @@ Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현
 
 <br>
 
+> "여러분이 만든 양이 운반기가 개라고 믿게 만드는 프로그램을 작성한다. 여러분들은 그 무리의 행동이 현실적으로 보이게 할 수 있겠는가?"
+
+👉 [Shepherd-Doggy Project](https://github.com/wonAdam/Shepherd-Doggy)
+
+<br>
+
 >## Chapter 4 Sports Simulation - 단순 축구
 Not Yet
 
