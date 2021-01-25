@@ -10,13 +10,13 @@ Youtube: Not yet<br>
 
 <br>
 
->## Chapter 2 State Machine Agent 구현하기
+## Chapter 2 State Machine Agent 구현하기
 기본적인 유한상태기계 모델을 응용하여 상태구동형 에이전트를 구현해봅니다. 
 - <strong>West World StateMachine Project</strong> <br>
 
 <br>
 
->## Chapter 3 자동으로 움직이는 Game Agent 구현하기
+## Chapter 3 자동으로 움직이는 Game Agent 구현하기
 Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현해봅니다. <br> <br>
 - <strong>Seek, Flee, Arrive, Pursuit, Evade, Wander</strong> <br>
 
@@ -38,31 +38,31 @@ Seek, Flee, Pursuit 등 기본적인 AI Game Agent의 SteeringBehavior를 구현
 
 <br>
 
->## Chapter 4 Sports Simulation - 단순 축구
+## Chapter 4 Sports Simulation - 단순 축구
 Not Yet
 
 <br>
 
->## Chapter 5 Secret of Graph - 그래프의 비밀
+## Chapter 5 Secret of Graph - 그래프의 비밀
 Not Yet
 
 
 <br>
 
->## Chapter 7 Raven
+## Chapter 7 Raven
 Not Yet
 
 <br>
 
->## Chapter 8 실질적인 길 계획하기
+## Chapter 8 실질적인 길 계획하기
 Not Yet
 
 <br>
 
->## Chapter 9 Goal Oriented Agent Behavior
+## Chapter 9 Goal Oriented Agent Behavior
 Not Yet
 
 <br>
 
->## Chapter 10 Fuzzy Logic
+## Chapter 10 Fuzzy Logic
 Not Yet
