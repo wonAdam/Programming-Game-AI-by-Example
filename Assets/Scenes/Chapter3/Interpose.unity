@@ -292,9 +292,11 @@ MonoBehaviour:
   maxForce: 0
   maxTurnRate: 0
   target: {fileID: 0}
+  path: {fileID: 0}
   sightAngle: 0
   sightLength: 0
-  steeringBehavior: {fileID: 0}
+  leader: {fileID: 0}
+  localOffsetInLeaderSpace: {x: 0, y: 0}
   agentA: {fileID: 965161809}
   agentB: {fileID: 1805701021}
 --- !u!114 &389086480
@@ -320,6 +322,9 @@ MonoBehaviour:
   detectedWall: {fileID: 0}
   prevHidingSpot: {x: 0, y: 0}
   hasHidingSpot: 0
+  groupBehaviorRadius: 0
+  groupBehaviorFOV: 0
+  destWaypoint: {fileID: 0}
 --- !u!1 &688898161
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,9 +603,11 @@ MonoBehaviour:
   maxForce: 0
   maxTurnRate: 0
   target: {fileID: 2119449401}
+  path: {fileID: 0}
   sightAngle: 0
   sightLength: 0
-  steeringBehavior: {fileID: 0}
+  leader: {fileID: 0}
+  localOffsetInLeaderSpace: {x: 0, y: 0}
   agentA: {fileID: 0}
   agentB: {fileID: 0}
 --- !u!50 &965161810
@@ -647,6 +654,9 @@ MonoBehaviour:
   detectedWall: {fileID: 0}
   prevHidingSpot: {x: 0, y: 0}
   hasHidingSpot: 0
+  groupBehaviorRadius: 0
+  groupBehaviorFOV: 0
+  destWaypoint: {fileID: 0}
 --- !u!114 &965161813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1335,9 +1345,11 @@ MonoBehaviour:
   maxForce: 0
   maxTurnRate: 0
   target: {fileID: 2119449401}
+  path: {fileID: 0}
   sightAngle: 0
   sightLength: 0
-  steeringBehavior: {fileID: 0}
+  leader: {fileID: 0}
+  localOffsetInLeaderSpace: {x: 0, y: 0}
   agentA: {fileID: 0}
   agentB: {fileID: 0}
 --- !u!50 &1805701022
@@ -1384,6 +1396,9 @@ MonoBehaviour:
   detectedWall: {fileID: 0}
   prevHidingSpot: {x: 0, y: 0}
   hasHidingSpot: 0
+  groupBehaviorRadius: 0
+  groupBehaviorFOV: 0
+  destWaypoint: {fileID: 0}
 --- !u!114 &1805701025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1617,11 +1632,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
         type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -4047.2737
-      objectReference: {fileID: 0}
-    - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
-        type: 3}
       propertyPath: m_LocalRotation.x
       value: -0
       objectReference: {fileID: 0}
@@ -1658,16 +1668,6 @@ PrefabInstance:
     - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8323425787237123310, guid: a8524d3c32f94174385ceccb59f4cc3c,
