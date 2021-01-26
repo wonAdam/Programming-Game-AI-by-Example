@@ -28,7 +28,7 @@ public class DFSPathfinder : Pathfinder
             if (currPathSnapShot.currNode == input.destination)
             {
                 Debug.Log("Pathfind Success");
-                OnEnd();
+                OnSearchEnd();
                 OnServe(currPathSnapShot.path);
                 yield break;
             }
