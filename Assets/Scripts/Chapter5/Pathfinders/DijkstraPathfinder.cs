@@ -83,12 +83,10 @@ public class DijkstraPathfinder : Pathfinder
             Debug.Log("currNode " + currNode.gameObject.name);
 
             // update via currNode
-            bool updateSome = false;
             foreach(var adjEdge in currNode.OutEdges)
             {
                 if(table[currNode].cost + adjEdge.Cost < table[adjEdge.To].cost)
                 {
-                    updateSome = true;
                     table[adjEdge.To].node_via = currNode;
                     table[adjEdge.To].cost = table[currNode].cost + adjEdge.Cost;
                 }
@@ -100,7 +98,7 @@ public class DijkstraPathfinder : Pathfinder
             foreach (var v in visited)
                 if (v.Value == false) visitedAll = false;
 
-            if (!updateSome && visitedAll)
+            if (visitedAll)
                 break;
 
             yield return null;

@@ -8,6 +8,7 @@ public class PathRequester: MonoBehaviour
     [SerializeField] BFSPathfinder _BFSPathfinder;
     [SerializeField] DFSPathfinder _DFSPathfinder;
     [SerializeField] DijkstraPathfinder _DijstraPathfinder;
+    [SerializeField] AStarPathfiner _AStarPathfinder;
     public enum Algorithm { BFS, DFS, Dijkstra, AStar }
     public Algorithm algorithm;
     public void Request(GraphNode start, GraphNode destination, Action<List<GraphNode>> OnServe)
@@ -24,7 +25,7 @@ public class PathRequester: MonoBehaviour
                 _DijstraPathfinder.Request(this, new DijkstraPathfinder.ReqInput(start, destination), OnServe);
                 break;
             case Algorithm.AStar:
-
+                _AStarPathfinder.Request(this, new AStarPathfiner.ReqInput(start, destination), OnServe);
                 break;
             default:
                 break;
