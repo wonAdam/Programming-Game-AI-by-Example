@@ -31,11 +31,12 @@ public abstract class Pathfinder : MonoBehaviour
 
     public virtual void Request(PathRequester requester, ReqInput input, Action<List<GraphNode>> OnServe)
     {
-        StartCoroutine(Search(input, OnServe));
+        
+        StartCoroutine(Search(FindObjectOfType<MapMgr>().map, input, OnServe));
     }
 
     protected void OnSearchBegin() => sState = FinderState.Process;
     protected void OnSearchEnd() => sState = FinderState.Idle;
 
-    public abstract IEnumerator Search(ReqInput input, Action<List<GraphNode>> OnServe);
+    public abstract IEnumerator Search(Graph<GraphNode, GraphEdge> graph, ReqInput input, Action<List<GraphNode>> OnServe);
 }

@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class DijkstraPathfinder : Pathfinder
 {
-    private Map map;
-
     public class TableElement
     {
         public readonly GraphNode node;
@@ -46,23 +44,19 @@ public class DijkstraPathfinder : Pathfinder
     }
 
 
-    public override IEnumerator Search(ReqInput input, Action<List<GraphNode>> OnServe)
+    public override IEnumerator Search(Graph<GraphNode, GraphEdge> graph, ReqInput input, Action<List<GraphNode>> OnServe)
     {
         OnSearchBegin();
 
-        // Get the Map
-        if (map == null)
-            map = FindObjectOfType<MapMgr>().map;
-
         // Table : Node, FromNode, Cost
         Table table = 
-            new Table(map.Nodes.ToList());
+            new Table(graph.Nodes.ToList());
 
         // Visited : Node, bool
         Dictionary<GraphNode, bool> visited = new Dictionary<GraphNode, bool>();
 
         // initialization of data structures  
-        foreach (var n in map.Nodes)
+        foreach (var n in graph.Nodes)
             visited.Add(n, false);
 
         table[input.start].cost = 0;

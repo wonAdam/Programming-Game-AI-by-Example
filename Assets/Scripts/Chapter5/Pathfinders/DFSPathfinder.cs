@@ -8,7 +8,7 @@ using UnityEngine;
 public class DFSPathfinder : Pathfinder
 {
 
-    public override IEnumerator Search(ReqInput input, Action<List<GraphNode>> OnServe)
+    public override IEnumerator Search(Graph<GraphNode, GraphEdge> graph, ReqInput input, Action<List<GraphNode>> OnServe)
     {
         OnSearchBegin();
 
