@@ -8,9 +8,9 @@ using UnityEngine;
 public class DFSPathfinder : Pathfinder
 {
 
-    public override IEnumerator Search(ReqInput input, Action<List<GraphNode>> OnServe, Action OnBegin, Action OnEnd)
+    public override IEnumerator Search(ReqInput input, Action<List<GraphNode>> OnServe)
     {
-        OnBegin();
+        OnSearchBegin();
 
         Stack<PathSnapShot> stack = new Stack<PathSnapShot>();
         input.start.OutEdges.ForEach(e => stack.Push(new PathSnapShot(e.To, new List<GraphNode>() { input.start })));
@@ -38,7 +38,7 @@ public class DFSPathfinder : Pathfinder
                 .ToList().ForEach(e => stack.Push(new PathSnapShot(e.To, new List<GraphNode>(currPath))));
         }
 
-        OnEnd();
+        OnSearchEnd();
         OnServe(null);
 
     }
