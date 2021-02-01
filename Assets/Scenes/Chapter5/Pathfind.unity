@@ -606,6 +606,7 @@ MonoBehaviour:
   start: {fileID: 0}
   destination: {fileID: 0}
   pathRequester: {fileID: 687650071}
+  clickedDuringPathfinding: 0
 --- !u!4 &687650070
 Transform:
   m_ObjectHideFlags: 0
@@ -1697,10 +1698,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockPrefab: {fileID: 4658899124631830666, guid: 5c00ea9083bc0e648a4cdb1ce7a3b73a,
     type: 3}
-  blockVerticalCount: 8
-  blockHorizontalCount: 10
-  blockSizeX: 1
-  blockSizeY: 1
+  blockVerticalCount: 45
+  blockHorizontalCount: 90
+  blockSizeX: 0.2
+  blockSizeY: 0.2
 --- !u!1 &1201438282
 GameObject:
   m_ObjectHideFlags: 0
@@ -2019,7 +2020,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!224 &1712252920
 RectTransform:

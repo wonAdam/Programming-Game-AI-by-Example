@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class Clicker : MonoBehaviour
 {
-    public enum State { SelectStart, SelectDestination, PathFinding }
+    public enum State { SelectStart, SelectDestination, PathFinding, Visualizing }
     public State state = State.SelectStart;
     [SerializeField] LayerMask NodeMask;
     [SerializeField] GraphNode start;
     [SerializeField] GraphNode destination;
     [SerializeField] PathRequester pathRequester;
+    [SerializeField] bool clickedDuringPathfinding;
     
 
     private void Update()
@@ -78,6 +79,9 @@ public class Clicker : MonoBehaviour
                     return;
                 case State.PathFinding:
                     return;
+                case State.Visualizing:
+                    clickedDuringPathfinding = true;
+                    return;
 
             }
         }
@@ -85,6 +89,7 @@ public class Clicker : MonoBehaviour
 
     public void OnServe(List<GraphNode> path)
     {
+        state = State.Visualizing;
         StartCoroutine(Pathfind(path));
     }
 
@@ -95,13 +100,21 @@ public class Clicker : MonoBehaviour
         int idx = 0;
         while (path.Count > idx)
         {
+            if(clickedDuringPathfinding)
+            {
+                path.ForEach((node) => node.GetComponent<SpriteRenderer>().color = Color.blue);
+                break;
+            }
+
+
             path[idx].GetComponent<SpriteRenderer>().color = Color.blue;
             idx++;
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.05f);
         }
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         path.ForEach((n) => n.GetComponent<SpriteRenderer>().color = Color.black);
         state = State.SelectStart;
+        clickedDuringPathfinding = false;
     }
 
 

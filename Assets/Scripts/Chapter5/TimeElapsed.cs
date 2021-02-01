@@ -36,12 +36,13 @@ public class TimeElapsed : MonoBehaviour
 
     public void UpdateTimeText(float time)
     {
-        int secone = (int)time % 10;
-        int secten = (int)(time / 10) % 10;
+        int milisec = (int)(time * 1000) % 1000;
+        int second = (int)time % 10;
+        int secten = (int)(time / 10) % 6;
         int minone = (int)(time / 60) % 10;
-        int minten = (int)(time / 600) % 10;
+        int minten = (int)(time / 600) % 6;
 
-        timeText.text = $"{minten}{minone} : {secten}{secone}";
+        timeText.text = $"{minten}{minone}:{secten}{second}.{milisec}";
     }
 
     private void UpdatePathfinder()
@@ -61,6 +62,8 @@ public class TimeElapsed : MonoBehaviour
                     currPathfinder = FindObjectOfType<DijkstraPathfinder>();
                 break;
             case PathRequester.Algorithm.AStar:
+                if (currPathfinder == null || currPathfinder.GetType() != typeof(AStarPathfiner))
+                    currPathfinder = FindObjectOfType<AStarPathfiner>();
                 break;
         }
     }

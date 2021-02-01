@@ -17,6 +17,8 @@ public class BFSPathfinder : Pathfinder
         Queue<PathSnapShot> queue = new Queue<PathSnapShot>();
         input.start.OutEdges.ForEach(e => queue.Enqueue(new PathSnapShot(e.To, new List<GraphNode>() { input.start })));
 
+        int count = 0;
+        int calcPerCount = 100;
         while (queue.Count > 0)
         {
             PathSnapShot currPathSnapShot;
@@ -44,8 +46,13 @@ public class BFSPathfinder : Pathfinder
                 .Where(e => !currPath.Contains(e.To) && visited[e.To] == false)
                 .ToList().ForEach(e => queue.Enqueue(new PathSnapShot(e.To, new List<GraphNode>(currPath))));
 
+            count++;
+            if (count >= calcPerCount)
+            {
+                count = 0;
+                yield return null;
 
-            yield return null;
+            }
         }
 
         OnSearchEnd();

@@ -61,8 +61,9 @@ public class DijkstraPathfinder : Pathfinder
 
         table[input.start].cost = 0;
 
-
-        while(true)
+        int count = 0;
+        int calcPerCount = 50;
+        while (true)
         {
             // find least cost && unvisited node
             GraphNode currNode = null;
@@ -95,13 +96,18 @@ public class DijkstraPathfinder : Pathfinder
 
             // check if visited all nodes
             bool visitedAll = true;
-            foreach (var v in visited)
-                if (v.Value == false) visitedAll = false;
+            if (visited.Values.Contains(false)) visitedAll = false;
 
             if (visitedAll)
                 break;
 
-            yield return null;
+            count++;
+            if (count >= calcPerCount)
+            {
+                count = 0;
+                yield return null;
+
+            }
         }
 
 

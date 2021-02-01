@@ -32,6 +32,8 @@ public class AStarPathfiner : Pathfinder
         openList.Add(new Node(input.start, null, 0, input.destination));
         List<Node> closedList = new List<Node>();
 
+        int count = 0;
+        int calcPerCount = 100;
         while (openList.Count > 0)
         {
             Node currNode = openList.Aggregate((accum, curr) => accum.fCost > curr.fCost ? curr : accum);
@@ -66,7 +68,13 @@ public class AStarPathfiner : Pathfinder
                 openList.Add(neighborNode);
             }
 
-             yield return null;
+            count++;
+            if (count >= calcPerCount)
+            {
+                count = 0;
+                yield return null;
+
+            }
         }
 
         OnServe(null);

@@ -32,4 +32,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Chapter3/OffsetPursuit.unity
     guid: d0bcf7b944d5ca141869f03f1c7cae30
+  - enabled: 1
+    path: Assets/Scenes/Chapter5/Pathfind.unity
+    guid: e646a25921925014ebc30f591efa2e50
   m_configObjects: {}

@@ -15,6 +15,8 @@ public class DFSPathfinder : Pathfinder
         Stack<PathSnapShot> stack = new Stack<PathSnapShot>();
         input.start.OutEdges.ForEach(e => stack.Push(new PathSnapShot(e.To, new List<GraphNode>() { input.start })));
 
+        int count = 0;
+        int calcPerCount = 100;
         while (stack.Count > 0)
         {
             PathSnapShot currPathSnapShot = stack.Pop();
@@ -36,6 +38,14 @@ public class DFSPathfinder : Pathfinder
             currNode.OutEdges
                 .Where(e => !currPath.Contains(e.To))
                 .ToList().ForEach(e => stack.Push(new PathSnapShot(e.To, new List<GraphNode>(currPath))));
+
+            count++;
+            if (count >= calcPerCount)
+            {
+                count = 0;
+                yield return null;
+
+            }
         }
 
         OnSearchEnd();
