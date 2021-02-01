@@ -7,6 +7,6 @@ public class MainSceneMgr : MonoBehaviour
 {
     public void OnClick_Btn(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
 }
