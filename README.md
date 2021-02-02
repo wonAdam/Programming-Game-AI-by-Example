@@ -4,7 +4,7 @@
 - 옮겨 구현한 후, 시연해볼 수 있는 실행파일 혹은 유튜브 시연영상링크를 올릴 예정입니다. <br>
 Executable: [[Releases]](https://github.com/wonAdam/Programming-Game-AI-by-Example/releases)<br>
 Youtube: Not yet<br>
-- Unity Engine Version : `2019.3.0f6` <br>
+- Unity Engine Version : `2019.3.0` <br>
 
 <hr>
 
