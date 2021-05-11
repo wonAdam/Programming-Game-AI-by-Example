@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1696,7 +1696,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60c1164abd61dcf45a512020ca941e65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockPrefab: {fileID: 4658899124631830666, guid: 5c00ea9083bc0e648a4cdb1ce7a3b73a,
+  blockPrefab: {fileID: 6759506205595861274, guid: 5c00ea9083bc0e648a4cdb1ce7a3b73a,
     type: 3}
   blockVerticalCount: 45
   blockHorizontalCount: 90

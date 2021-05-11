@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class GraphNode : MonoBehaviour
+public class GraphNode : MonoBehaviour
 {
 
     [SerializeField] protected List<GraphEdge> outEdges = new List<GraphEdge>();

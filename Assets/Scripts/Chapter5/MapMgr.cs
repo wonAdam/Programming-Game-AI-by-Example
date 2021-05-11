@@ -7,13 +7,13 @@ public class MapMgr : MonoBehaviour
     
     public Map map = new Map(true);
 
-    [SerializeField] Block blockPrefab;
+    [SerializeField] GraphNode blockPrefab;
     [SerializeField] int blockVerticalCount;
     [SerializeField] int blockHorizontalCount;
     [SerializeField] float blockSizeX;
     [SerializeField] float blockSizeY;
  
-    public List<List<Block>> blocks = new List<List<Block>>();
+    public List<List<GraphNode>> blocks = new List<List<GraphNode>>();
 
     private void Start()
     {
@@ -33,11 +33,11 @@ public class MapMgr : MonoBehaviour
     {
         for (int i = 0; i < blockVerticalCount; i++)
         {
-            blocks.Add(new List<Block>());
+            blocks.Add(new List<GraphNode>());
             for (int j = 0; j < blockHorizontalCount; j++)
             {
                 Vector3 pos = leftBottomMost + new Vector3(blockSizeX * j, blockSizeY * i, 0f);
-                Block block = Instantiate(blockPrefab, pos, Quaternion.identity);
+                GraphNode block = Instantiate(blockPrefab, pos, Quaternion.identity);
                 blocks[i].Add(block);
                 map.AddNode(block);
             }
